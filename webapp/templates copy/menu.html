@@ -1,0 +1,265 @@
+{% extends "layout.html" %}
+
+{% block title %}Меню - Bar Bot{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-tg-text mb-2">Меню бара</h1>
+        <p class="text-tg-hint">Выберите категорию или просмотрите все позиции</p>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="mb-6">
+        <div class="flex flex-wrap gap-2">
+            <button class="category-filter active" data-category="all">
+                Все
+            </button>
+            {% for category in categories %}
+            <button class="category-filter" data-category="{{ category.id }}">
+                {{ category.name }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-menu" class="hidden flex justify-center items-center py-8">
+        <div class="spinner"></div>
+        <span class="ml-2 text-tg-hint">Загрузка меню...</span>
+    </div>
+
+    <!-- Menu Items -->
+    <div id="menu-items" class="space-y-4">
+        {% for category in categories %}
+        <div class="category-section" data-category="{{ category.id }}">
+            <h2 class="text-lg font-semibold text-tg-text mb-3 sticky top-16 bg-tg-bg py-2">
+                {{ category.name }}
+            </h2>
+            
+            <div class="space-y-3">
+                {% for item in category.items %}
+                {% if item.is_available %}
+                <div class="menu-item" data-item-id="{{ item.id }}">
+                    {% if item.image_url %}
+                    <img src="{{ item.image_url }}" 
+                         alt="{{ item.name }}" 
+                         class="w-16 h-16 object-cover rounded-lg mr-4 flex-shrink-0"
+                         onerror="this.style.display='none'">
+                    {% else %}
+                    <div class="w-16 h-16 bg-tg-secondary-bg rounded-lg mr-4 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-tg-hint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-medium text-tg-text truncate">{{ item.name }}</h3>
+                        {% if item.description %}
+                        <p class="text-sm text-tg-hint mt-1 line-clamp-2">{{ item.description }}</p>
+                        {% endif %}
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-lg font-semibold text-tg-button">{{ "%.0f"|format(item.price) }} ₽</span>
+                            <button class="btn-primary text-sm px-3 py-1" onclick="addToOrder({{ item.id }})">
+                                Добавить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-menu" class="hidden text-center py-12">
+        <svg class="w-16 h-16 text-tg-hint mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-tg-text mb-2">Меню пусто</h3>
+        <p class="text-tg-hint">В данной категории пока нет доступных позиций</p>
+    </div>
+</div>
+
+<!-- Order Summary (if items added) -->
+<div id="order-summary" class="hidden fixed bottom-20 left-4 right-4 bg-tg-button text-tg-button-text rounded-lg p-4 shadow-lg">
+    <div class="flex items-center justify-between">
+        <div>
+            <span id="order-count" class="font-medium">0 позиций</span>
+            <span class="mx-2">•</span>
+            <span id="order-total" class="font-semibold">0 ₽</span>
+        </div>
+        <button class="bg-white bg-opacity-20 px-4 py-2 rounded-lg font-medium" onclick="viewOrder()">
+            Заказать
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Menu page functionality
+let currentOrder = [];
+let menuData = {{ menu_data | tojson }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    initMenuFilters();
+    loadOrderFromStorage();
+});
+
+/**
+ * Initialize category filters
+ */
+function initMenuFilters() {
+    const filterButtons = document.querySelectorAll('.category-filter');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active state
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter menu items
+            const categoryId = this.getAttribute('data-category');
+            filterMenuByCategory(categoryId);
+        });
+    });
+}
+
+/**
+ * Filter menu items by category
+ */
+function filterMenuByCategory(categoryId) {
+    const categorySections = document.querySelectorAll('.category-section');
+    let hasVisibleItems = false;
+    
+    categorySections.forEach(section => {
+        if (categoryId === 'all' || section.getAttribute('data-category') === categoryId) {
+            section.style.display = 'block';
+            hasVisibleItems = true;
+        } else {
+            section.style.display = 'none';
+        }
+    });
+    
+    // Show/hide empty state
+    const emptyState = document.getElementById('empty-menu');
+    const menuItems = document.getElementById('menu-items');
+    
+    if (!hasVisibleItems) {
+        emptyState.classList.remove('hidden');
+        menuItems.classList.add('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+        menuItems.classList.remove('hidden');
+    }
+}
+
+/**
+ * Add item to order
+ */
+function addToOrder(itemId) {
+    // Find item in menu data
+    let item = null;
+    for (const category of menuData) {
+        item = category.items.find(i => i.id === itemId);
+        if (item) break;
+    }
+    
+    if (!item) return;
+    
+    // Check if item already in order
+    const existingItem = currentOrder.find(orderItem => orderItem.id === itemId);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        currentOrder.push({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: 1
+        });
+    }
+    
+    updateOrderSummary();
+    saveOrderToStorage();
+    
+    // Show feedback
+    BarBot.showSuccess(`${item.name} добавлен в заказ`);
+}
+
+/**
+ * Update order summary display
+ */
+function updateOrderSummary() {
+    const orderSummary = document.getElementById('order-summary');
+    const orderCount = document.getElementById('order-count');
+    const orderTotal = document.getElementById('order-total');
+    
+    if (currentOrder.length === 0) {
+        orderSummary.classList.add('hidden');
+        return;
+    }
+    
+    const totalItems = currentOrder.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    orderCount.textContent = `${totalItems} ${getItemsWord(totalItems)}`;
+    orderTotal.textContent = `${Math.round(totalPrice)} ₽`;
+    
+    orderSummary.classList.remove('hidden');
+}
+
+/**
+ * Get correct word form for items count
+ */
+function getItemsWord(count) {
+    if (count % 10 === 1 && count % 100 !== 11) {
+        return 'позиция';
+    } else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
+        return 'позиции';
+    } else {
+        return 'позиций';
+    }
+}
+
+/**
+ * View current order
+ */
+function viewOrder() {
+    if (currentOrder.length === 0) return;
+    
+    // For now, just show order details
+    const orderDetails = currentOrder.map(item => 
+        `${item.name} x${item.quantity} - ${Math.round(item.price * item.quantity)} ₽`
+    ).join('\n');
+    
+    const totalPrice = currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    BarBot.showSuccess(`Ваш заказ:\n${orderDetails}\n\nИтого: ${Math.round(totalPrice)} ₽`);
+}
+
+/**
+ * Save order to localStorage
+ */
+function saveOrderToStorage() {
+    localStorage.setItem('currentOrder', JSON.stringify(currentOrder));
+}
+
+/**
+ * Load order from localStorage
+ */
+function loadOrderFromStorage() {
+    const savedOrder = localStorage.getItem('currentOrder');
+    if (savedOrder) {
+        currentOrder = JSON.parse(savedOrder);
+        updateOrderSummary();
+    }
+}
+</script>
+{% endblock %}

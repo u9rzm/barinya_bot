@@ -1,0 +1,295 @@
+{% extends "layout.html" %}
+
+{% block title %}Профиль - Bar Bot{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-tg-text mb-2">Мой профиль</h1>
+        <p class="text-tg-hint">Информация о вашем аккаунте и программе лояльности</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-profile" class="flex justify-center items-center py-8">
+        <div class="spinner"></div>
+        <span class="ml-2 text-tg-hint">Загрузка профиля...</span>
+    </div>
+
+    <!-- Profile Content -->
+    <div id="profile-content" class="hidden space-y-6">
+        <!-- User Info Card -->
+        <div class="card">
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="w-16 h-16 bg-tg-button rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8 text-tg-button-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h2 id="user-name" class="text-lg font-semibold text-tg-text">Загрузка...</h2>
+                    <p class="text-tg-hint">Участник с <span id="registration-date">...</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loyalty Stats Grid -->
+        <div class="stats-grid">
+            <!-- Loyalty Points -->
+            <div class="stat-card">
+                <div class="stat-value" id="loyalty-points">0</div>
+                <div class="stat-label">Баллы лояльности</div>
+            </div>
+
+            <!-- Current Level -->
+            <div class="stat-card">
+                <div class="stat-value" id="current-level">-</div>
+                <div class="stat-label">Текущий уровень</div>
+            </div>
+
+            <!-- Referrals Count -->
+            <div class="stat-card">
+                <div class="stat-value" id="referrals-count">0</div>
+                <div class="stat-label">Приглашено друзей</div>
+            </div>
+
+            <!-- Total Spent -->
+            <div class="stat-card">
+                <div class="stat-value" id="total-spent">0 ₽</div>
+                <div class="stat-label">Потрачено всего</div>
+            </div>
+        </div>
+
+        <!-- Level Progress -->
+        <div class="card">
+            <h3 class="text-lg font-semibold text-tg-text mb-4">Прогресс до следующего уровня</h3>
+            
+            <div id="level-progress-content">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-tg-hint" id="current-level-name">Текущий уровень</span>
+                    <span class="text-sm text-tg-hint" id="next-level-name">Следующий уровень</span>
+                </div>
+                
+                <div class="progress-bar mb-2">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-tg-hint">
+                        <span id="current-spent">0 ₽</span> из <span id="next-threshold">0 ₽</span>
+                    </span>
+                    <span class="text-tg-button font-medium" id="remaining-amount">Осталось: 0 ₽</span>
+                </div>
+            </div>
+
+            <div id="max-level-reached" class="hidden text-center py-4">
+                <svg class="w-12 h-12 text-yellow-500 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                </svg>
+                <h4 class="font-semibold text-tg-text">Максимальный уровень!</h4>
+                <p class="text-tg-hint text-sm">Вы достигли высшего уровня лояльности</p>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="space-y-3">
+            <a href="/loyalty-history" class="block card hover:bg-opacity-80 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-6 h-6 text-tg-button" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-medium text-tg-text">История баллов</h4>
+                            <p class="text-sm text-tg-hint">Все транзакции баллов лояльности</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-tg-hint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="/referral-stats" class="block card hover:bg-opacity-80 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-6 h-6 text-tg-button" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-medium text-tg-text">Реферальная программа</h4>
+                            <p class="text-sm text-tg-hint">Приглашайте друзей и получайте баллы</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-tg-hint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="/order-history" class="block card hover:bg-opacity-80 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-6 h-6 text-tg-button" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-medium text-tg-text">История заказов</h4>
+                            <p class="text-sm text-tg-hint">Все ваши заказы в баре</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-tg-hint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="/loyalty-levels" class="block card hover:bg-opacity-80 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-6 h-6 text-tg-button" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                        </svg>
+                        <div>
+                            <h4 class="font-medium text-tg-text">Уровни лояльности</h4>
+                            <p class="text-sm text-tg-hint">Все уровни и их преимущества</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-tg-hint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="hidden text-center py-12">
+        <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-tg-text mb-2">Ошибка загрузки</h3>
+        <p class="text-tg-hint mb-4">Не удалось загрузить данные профиля</p>
+        <button class="btn-primary" onclick="loadProfile()">Попробовать снова</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Profile page functionality
+let profileData = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadProfile();
+});
+
+/**
+ * Load profile data from API
+ */
+async function loadProfile() {
+    try {
+        BarBot.showLoading();
+        
+        // Load user profile and stats
+        const [profile, loyaltyBalance, loyaltyLevels, referralStats] = await Promise.all([
+            BarBot.apiRequest('/user/profile'),
+            BarBot.apiRequest('/loyalty/balance'),
+            BarBot.apiRequest('/loyalty/levels'),
+            BarBot.apiRequest('/referral/stats')
+        ]);
+        
+        profileData = {
+            profile,
+            loyaltyBalance,
+            loyaltyLevels,
+            referralStats
+        };
+        
+        displayProfile();
+        
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        showErrorState();
+    } finally {
+        BarBot.hideLoading();
+    }
+}
+
+/**
+ * Display profile data
+ */
+function displayProfile() {
+    const { profile, loyaltyBalance, loyaltyLevels, referralStats } = profileData;
+    
+    // Update user info
+    document.getElementById('user-name').textContent = 
+        profile.first_name || profile.username || 'Пользователь';
+    document.getElementById('registration-date').textContent = 
+        BarBot.formatDate(profile.created_at);
+    
+    // Update stats
+    document.getElementById('loyalty-points').textContent = 
+        BarBot.formatPoints(loyaltyBalance.balance);
+    document.getElementById('current-level').textContent = 
+        profile.loyalty_level?.name || 'Новичок';
+    document.getElementById('referrals-count').textContent = 
+        referralStats.total_referrals;
+    document.getElementById('total-spent').textContent = 
+        BarBot.formatCurrency(profile.total_spent);
+    
+    // Update level progress
+    updateLevelProgress(profile, loyaltyLevels);
+    
+    // Show content
+    document.getElementById('loading-profile').classList.add('hidden');
+    document.getElementById('profile-content').classList.remove('hidden');
+}
+
+/**
+ * Update level progress display
+ */
+function updateLevelProgress(profile, levels) {
+    const currentLevel = profile.loyalty_level;
+    const totalSpent = profile.total_spent;
+    
+    // Find next level
+    const sortedLevels = levels.sort((a, b) => a.threshold - b.threshold);
+    const nextLevel = sortedLevels.find(level => level.threshold > totalSpent);
+    
+    if (!nextLevel) {
+        // Max level reached
+        document.getElementById('level-progress-content').classList.add('hidden');
+        document.getElementById('max-level-reached').classList.remove('hidden');
+        return;
+    }
+    
+    // Calculate progress
+    const currentThreshold = currentLevel?.threshold || 0;
+    const nextThreshold = nextLevel.threshold;
+    const progress = Math.min(100, ((totalSpent - currentThreshold) / (nextThreshold - currentThreshold)) * 100);
+    const remaining = Math.max(0, nextThreshold - totalSpent);
+    
+    // Update progress display
+    document.getElementById('current-level-name').textContent = 
+        currentLevel?.name || 'Новичок';
+    document.getElementById('next-level-name').textContent = nextLevel.name;
+    document.getElementById('progress-fill').style.width = `${progress}%`;
+    document.getElementById('current-spent').textContent = 
+        BarBot.formatCurrency(totalSpent);
+    document.getElementById('next-threshold').textContent = 
+        BarBot.formatCurrency(nextThreshold);
+    document.getElementById('remaining-amount').textContent = 
+        `Осталось: ${BarBot.formatCurrency(remaining)}`;
+}
+
+/**
+ * Show error state
+ */
+function showErrorState() {
+    document.getElementById('loading-profile').classList.add('hidden');
+    document.getElementById('profile-content').classList.add('hidden');
+    document.getElementById('error-state').classList.remove('hidden');
+}
+</script>
+{% endblock %}

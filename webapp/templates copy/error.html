@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}Ошибка - Bar Bot{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <div class="text-center py-12">
+        <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h1 class="text-2xl font-bold text-tg-text mb-2">Произошла ошибка</h1>
+        <p class="text-tg-hint mb-6">{{ error or "Что-то пошло не так. Попробуйте еще раз." }}</p>
+        <div class="space-y-3">
+            <button onclick="window.history.back()" class="btn-secondary w-full">
+                Назад
+            </button>
+            <a href="/menu" class="btn-primary block w-full text-center">
+                На главную
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

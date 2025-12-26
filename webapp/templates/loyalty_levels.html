@@ -1,0 +1,300 @@
+{% extends "layout.html" %}
+
+{% block title %}Уровни лояльности - Bar Bot{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-tg-text mb-2">Уровни лояльности</h1>
+        <p class="text-tg-hint">Все уровни и их преимущества</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-levels" class="flex justify-center items-center py-8">
+        <div class="spinner"></div>
+        <span class="ml-2 text-tg-hint">Загрузка уровней...</span>
+    </div>
+
+    <!-- Levels Content -->
+    <div id="levels-content" class="hidden">
+        <!-- Current User Level Info -->
+        <div id="current-level-info" class="card mb-6">
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="w-16 h-16 bg-tg-button rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8 text-tg-button-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-semibold text-tg-text">Ваш текущий уровень</h2>
+                    <p id="current-level-name" class="text-tg-button font-medium">Загрузка...</p>
+                    <p class="text-sm text-tg-hint">Потрачено: <span id="user-total-spent">0 ₽</span></p>
+                </div>
+            </div>
+            
+            <!-- Progress to next level -->
+            <div id="progress-section" class="mt-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-tg-hint">Прогресс до следующего уровня</span>
+                    <span class="text-sm text-tg-button font-medium" id="progress-text">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="level-progress" style="width: 0%"></div>
+                </div>
+                <div class="text-xs text-tg-hint mt-1" id="progress-details">
+                    Осталось потратить: 0 ₽
+                </div>
+            </div>
+
+            <div id="max-level-badge" class="hidden mt-4 text-center">
+                <div class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                    </svg>
+                    Максимальный уровень
+                </div>
+            </div>
+        </div>
+
+        <!-- Levels List -->
+        <div class="space-y-4" id="levels-list">
+            <!-- Levels will be populated here -->
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-levels" class="hidden text-center py-12">
+        <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-tg-text mb-2">Ошибка загрузки</h3>
+        <p class="text-tg-hint mb-4">Не удалось загрузить уровни лояльности</p>
+        <button class="btn-primary" onclick="loadLevels()">Попробовать снова</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Loyalty levels page functionality
+let levelsData = [];
+let userProfile = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadLevels();
+});
+
+/**
+ * Load levels and user data from API
+ */
+async function loadLevels() {
+    try {
+        BarBot.showLoading();
+        
+        // Load levels and user profile
+        const [levels, profile] = await Promise.all([
+            BarBot.apiRequest('/loyalty/levels'),
+            BarBot.apiRequest('/user/profile')
+        ]);
+        
+        levelsData = levels.sort((a, b) => a.threshold - b.threshold);
+        userProfile = profile;
+        
+        displayLevels();
+        
+    } catch (error) {
+        console.error('Error loading levels:', error);
+        showErrorState();
+    } finally {
+        BarBot.hideLoading();
+    }
+}
+
+/**
+ * Display levels data
+ */
+function displayLevels() {
+    // Update current level info
+    updateCurrentLevelInfo();
+    
+    // Render levels list
+    const levelsList = document.getElementById('levels-list');
+    levelsList.innerHTML = '';
+    
+    levelsData.forEach((level, index) => {
+        const levelElement = createLevelElement(level, index);
+        levelsList.appendChild(levelElement);
+    });
+    
+    // Show content
+    document.getElementById('loading-levels').classList.add('hidden');
+    document.getElementById('levels-content').classList.remove('hidden');
+}
+
+/**
+ * Update current level information
+ */
+function updateCurrentLevelInfo() {
+    const currentLevel = userProfile.loyalty_level;
+    const totalSpent = userProfile.total_spent;
+    
+    // Update current level display
+    document.getElementById('current-level-name').textContent = 
+        currentLevel?.name || 'Новичок';
+    document.getElementById('user-total-spent').textContent = 
+        BarBot.formatCurrency(totalSpent);
+    
+    // Find next level and calculate progress
+    const nextLevel = levelsData.find(level => level.threshold > totalSpent);
+    
+    if (nextLevel) {
+        const currentThreshold = currentLevel?.threshold || 0;
+        const progress = Math.min(100, ((totalSpent - currentThreshold) / (nextLevel.threshold - currentThreshold)) * 100);
+        const remaining = nextLevel.threshold - totalSpent;
+        
+        document.getElementById('level-progress').style.width = `${progress}%`;
+        document.getElementById('progress-text').textContent = `${Math.round(progress)}%`;
+        document.getElementById('progress-details').textContent = 
+            `Осталось потратить: ${BarBot.formatCurrency(remaining)}`;
+        
+        document.getElementById('progress-section').classList.remove('hidden');
+        document.getElementById('max-level-badge').classList.add('hidden');
+    } else {
+        // Max level reached
+        document.getElementById('progress-section').classList.add('hidden');
+        document.getElementById('max-level-badge').classList.remove('hidden');
+    }
+}
+
+/**
+ * Create level element
+ */
+function createLevelElement(level, index) {
+    const isCurrentLevel = userProfile.loyalty_level?.id === level.id;
+    const isAchieved = userProfile.total_spent >= level.threshold;
+    const isNext = !isAchieved && levelsData.findIndex(l => userProfile.total_spent >= l.threshold) === index - 1;
+    
+    const levelDiv = document.createElement('div');
+    levelDiv.className = `card ${isCurrentLevel ? 'ring-2 ring-tg-button' : ''}`;
+    
+    // Level icon based on position
+    const levelIcons = [
+        'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z', // Star
+        'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z', // Badge
+        'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' // Sparkles
+    ];
+    
+    const iconPath = levelIcons[Math.min(index, levelIcons.length - 1)];
+    const iconColor = isAchieved ? 'text-tg-button' : 'text-tg-hint';
+    
+    levelDiv.innerHTML = `
+        <div class="flex items-start space-x-4">
+            <!-- Level Icon -->
+            <div class="w-12 h-12 ${isAchieved ? 'bg-tg-button' : 'bg-tg-secondary-bg'} rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 ${isAchieved ? 'text-tg-button-text' : 'text-tg-hint'}" fill="${isAchieved ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}"></path>
+                </svg>
+            </div>
+            
+            <!-- Level Info -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-tg-text">${level.name}</h3>
+                    <div class="flex items-center space-x-2">
+                        ${isCurrentLevel ? `
+                            <span class="px-2 py-1 text-xs bg-tg-button text-tg-button-text rounded-full">
+                                Текущий
+                            </span>
+                        ` : ''}
+                        ${isNext ? `
+                            <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                Следующий
+                            </span>
+                        ` : ''}
+                        ${isAchieved && !isCurrentLevel ? `
+                            <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                            </svg>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- Threshold -->
+                <div class="mb-3">
+                    <div class="flex items-center justify-between text-sm mb-1">
+                        <span class="text-tg-hint">Порог для достижения</span>
+                        <span class="font-medium text-tg-text">${BarBot.formatCurrency(level.threshold)}</span>
+                    </div>
+                    ${!isAchieved && level.threshold > 0 ? `
+                        <div class="text-xs text-tg-hint">
+                            Нужно потратить еще: ${BarBot.formatCurrency(level.threshold - userProfile.total_spent)}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <!-- Benefits -->
+                <div class="bg-tg-bg rounded-lg p-3">
+                    <h4 class="text-sm font-medium text-tg-text mb-2">Преимущества уровня:</h4>
+                    <div class="space-y-1">
+                        <div class="flex items-center text-sm">
+                            <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-tg-text">Начисление ${level.points_rate}% баллов с заказов</span>
+                        </div>
+                        
+                        ${level.threshold === 0 ? `
+                            <div class="flex items-center text-sm">
+                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-tg-text">Доступ к программе лояльности</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${level.threshold >= 5000 ? `
+                            <div class="flex items-center text-sm">
+                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-tg-text">Приоритетная поддержка</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${level.threshold >= 10000 ? `
+                            <div class="flex items-center text-sm">
+                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-tg-text">Эксклюзивные предложения</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${level.threshold >= 25000 ? `
+                            <div class="flex items-center text-sm">
+                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="text-tg-text">VIP статус и персональный менеджер</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return levelDiv;
+}
+
+/**
+ * Show error state
+ */
+function showErrorState() {
+    document.getElementById('loading-levels').classList.add('hidden');
+    document.getElementById('levels-content').classList.add('hidden');
+    document.getElementById('error-levels').classList.remove('hidden');
+}
+</script>
+{% endblock %}

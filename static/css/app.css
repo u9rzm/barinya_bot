@@ -1,0 +1,418 @@
+/* Custom CSS for Telegram Bar Bot Mini App */
+
+/* Telegram Web App theme variables */
+:root {
+    --tg-theme-bg-color: #ffffff;
+    --tg-theme-text-color: #000000;
+    --tg-theme-hint-color: #999999;
+    --tg-theme-link-color: #2481cc;
+    --tg-theme-button-color: #2481cc;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-secondary-bg-color: #f1f1f1;
+    --tg-theme-destructive-text-color: #ff3b30;
+    --tg-theme-header-bg-color: #ffffff;
+    --tg-theme-accent-text-color: #2481cc;
+    --tg-theme-section-bg-color: #ffffff;
+    --tg-theme-section-header-text-color: #6d6d71;
+    --tg-theme-subtitle-text-color: #999999;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --tg-theme-bg-color: #212121;
+        --tg-theme-text-color: #ffffff;
+        --tg-theme-hint-color: #aaaaaa;
+        --tg-theme-link-color: #8774e1;
+        --tg-theme-button-color: #8774e1;
+        --tg-theme-button-text-color: #ffffff;
+        --tg-theme-secondary-bg-color: #181818;
+        --tg-theme-destructive-text-color: #ff453a;
+        --tg-theme-header-bg-color: #212121;
+        --tg-theme-accent-text-color: #8774e1;
+        --tg-theme-section-bg-color: #1c1c1e;
+        --tg-theme-section-header-text-color: #8e8e93;
+        --tg-theme-subtitle-text-color: #8e8e93;
+    }
+}
+
+/* Base styles */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Navigation active state */
+.nav-item.active {
+    color: var(--tg-theme-link-color);
+}
+
+/* Custom button styles */
+.btn-primary {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.8;
+}
+
+.btn-secondary {
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    border: 1px solid var(--tg-theme-hint-color);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn-secondary:hover {
+    opacity: 0.8;
+}
+
+/* Card styles */
+.card {
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Loading spinner */
+.spinner {
+    border: 2px solid var(--tg-theme-hint-color);
+    border-top: 2px solid var(--tg-theme-button-color);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Menu item styles */
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background-color: var(--tg-theme-bg-color);
+    border: 1px solid var(--tg-theme-secondary-bg-color);
+    transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+    background-color: var(--tg-theme-secondary-bg-color);
+}
+
+.menu-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 12px;
+}
+
+/* Category filter buttons */
+.category-filter {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 4px;
+    border-radius: 20px;
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    border: 1px solid var(--tg-theme-hint-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.category-filter.active {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+    border-color: var(--tg-theme-button-color);
+}
+
+/* Progress bar */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--tg-theme-button-color);
+    transition: width 0.3s ease;
+}
+
+/* Stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 16px;
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: 12px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--tg-theme-button-color);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--tg-theme-hint-color);
+    margin-top: 4px;
+}
+
+/* Transaction list */
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid var(--tg-theme-secondary-bg-color);
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+.transaction-amount.positive {
+    color: #22c55e;
+}
+
+.transaction-amount.negative {
+    color: #ef4444;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .menu-item {
+        padding: 8px;
+    }
+    
+    .menu-item img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .card {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+    
+    /* Adjust navigation for smaller screens */
+    .nav-item span {
+        font-size: 10px;
+    }
+    
+    .nav-item svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* Dropdown menu adjustments */
+    #stats-dropdown {
+        right: -20px;
+        min-width: 160px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        padding: 12px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    .menu-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .menu-item img {
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+}
+
+/* Large screens (tablets and up) */
+@media (min-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .menu-item {
+        padding: 16px;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+}
+
+/* Telegram-specific enhancements */
+.tg-safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+}
+
+.tg-safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Enhanced animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Loading states */
+.skeleton {
+    background: linear-gradient(90deg, var(--tg-theme-secondary-bg-color) 25%, transparent 50%, var(--tg-theme-secondary-bg-color) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Enhanced button styles */
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}
+
+/* Improved focus states for accessibility */
+.btn-primary:focus,
+.btn-secondary:focus,
+.nav-item:focus {
+    outline: 2px solid var(--tg-theme-accent-text-color);
+    outline-offset: 2px;
+}
+
+/* Enhanced dropdown styles */
+#stats-dropdown {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Improved transaction styles */
+.transaction-item {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: background-color 0.2s;
+}
+
+.transaction-item:hover {
+    background-color: var(--tg-theme-secondary-bg-color);
+}
+
+/* Enhanced level progress */
+.progress-bar {
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Improved menu category filters */
+.category-filter {
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.category-filter:active {
+    transform: scale(0.95);
+}
+
+/* Enhanced order summary */
+#order-summary {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Utility classes for Telegram theme integration */
+.text-destructive {
+    color: var(--tg-theme-destructive-text-color);
+}
+
+.text-accent {
+    color: var(--tg-theme-accent-text-color);
+}
+
+.text-subtitle {
+    color: var(--tg-theme-subtitle-text-color);
+}
+
+.bg-section {
+    background-color: var(--tg-theme-section-bg-color);
+}
+
+.text-section-header {
+    color: var(--tg-theme-section-header-text-color);
+}

@@ -1,0 +1,161 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: telegram-bar-bot-db
+    environment:
+      POSTGRES_DB: telegram_bar_bot
+      POSTGRES_USER: barbot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-barbot_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+    # Убираем внешний порт - доступ только изнутри Docker сети
+    expose:
+      - "5432"
+    networks:
+      - bar-bot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U barbot -d telegram_bar_bot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Web Application (FastAPI)
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: production
+    container_name: telegram-bar-bot-app-dev
+    environment:
+      # Database
+      DATABASE_URL: postgresql+asyncpg://barbot:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
+      
+      # Telegram Bot
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      
+      # Admin
+      ADMIN_TELEGRAM_IDS: ${ADMIN_TELEGRAM_IDS}
+      
+      # Application
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      DEBUG: ${DEBUG:-False}
+      
+      # Google Sheets (optional)
+      GOOGLE_SHEETS_CREDENTIALS_FILE: ${GOOGLE_SHEETS_CREDENTIALS_FILE:-}
+      GOOGLE_SHEETS_SPREADSHEET_ID: ${GOOGLE_SHEETS_SPREADSHEET_ID:-}
+      GOOGLE_SHEETS_RANGE: ${GOOGLE_SHEETS_RANGE:-Menu!A2:F}
+      
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-secret}
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - ./webapp:/app/webapp
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+      - ./credentials.json:/app/credentials.json:ro
+    # Внешний порт закрыт - доступ только через nginx
+    # ports:
+    #   - "8000:8000"
+    expose:
+      - "8000"
+    networks:
+      - bar-bot-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Telegram Bot
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot.dev
+    container_name: telegram-bar-bot-dev
+    environment:
+      # Database
+      DATABASE_URL: postgresql+asyncpg://barbot:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
+      
+      # Telegram Bot
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-}
+      
+      # Admin
+      ADMIN_TELEGRAM_IDS: ${ADMIN_TELEGRAM_IDS}
+      
+      # Application
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8001
+      DEBUG: ${DEBUG:-False}
+      
+      # JWT
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-secret}
+      
+      # Google Sheets (optional)
+      GOOGLE_SHEETS_CREDENTIALS_FILE: ${GOOGLE_SHEETS_CREDENTIALS_FILE:-}
+      GOOGLE_SHEETS_SPREADSHEET_ID: ${GOOGLE_SHEETS_SPREADSHEET_ID:-}
+      GOOGLE_SHEETS_RANGE: ${GOOGLE_SHEETS_RANGE:-Menu!A2:F}
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - ./bot:/app/bot
+      - ./shared:/app/shared
+      - ./logs:/app/logs
+      - ./credentials.json:/app/credentials.json:ro
+    networks:
+      - bar-bot-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import asyncio; print('Bot is running')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Reverse Proxy (for SSL termination)
+  nginx:
+    image: nginx:alpine
+    container_name: telegram-bar-bot-nginx
+    volumes:
+      - ./static:/static:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - /opt/ssl-backup/certs/workflow.chickenkiller.com:/etc/nginx/ssl:ro
+      - /var/log/nginx:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - bar-bot-network
+    depends_on:
+      - webapp
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  bar-bot-network:
+    driver: bridge
+    # enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16       # IPv4
+        # - subnet: "2001:db8:1::/64"  # IPv6

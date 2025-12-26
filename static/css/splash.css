@@ -1,0 +1,36 @@
+/* ===== Splash ===== */
+
+#splash {
+  position: fixed;
+  inset: 0;
+  background: #0a2328;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.splash-logo {
+  font-family: "Enthalpy298";
+  font-size: 42px;
+  color: #FAAC6E;
+  letter-spacing: 0.15em;
+  animation: splashFade 1s ease forwards;
+}
+
+@keyframes splashFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

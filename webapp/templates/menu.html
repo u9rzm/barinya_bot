@@ -1,0 +1,41 @@
+<main id="menu">
+
+    {% for category in categories %}
+        <section id="cat-{{ category.id }}" class="category-section">
+
+            <h2 class="category-title">
+                {{ category.name }}
+            </h2>
+
+            {% for sub in category.subcategories %}
+                <h3 class="subcategory-title">
+                    {{ sub.name }}
+                </h3>
+
+                {% for item in sub.items %}
+                    <div class="item">
+
+                        <div class="item-text">
+                            <div class="item-name">
+                                {{ item.name }}
+                            </div>
+
+                            {% if item.description %}
+                                <div class="item-description">
+                                    {{ item.description }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="item-price">
+                            {{ item.price }} ₽
+                        </div>
+
+                    </div>
+                {% endfor %}
+
+            {% endfor %}
+        </section>
+    {% endfor %}
+
+</main>
