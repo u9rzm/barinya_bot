@@ -1,54 +1,38 @@
-/* ===== Loader ===== */
-
 .loader {
-  position: fixed;
-  inset: 0;
-  background: #0a2328;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
+          width: 40px;
+          height: 98px;
+          display: inline-block;
+          position: relative;
+          border: 3px solid #004650;
+          box-sizing: border-box;
+          color: #faac6e;
+          border-radius: 20px 20px 4px 4px;
+          background: #fff;
+          animation: fill 2s linear infinite alternate;
+        }
+        .loader::after {
+          content: '';
+          box-sizing: border-box;
+          position: absolute;
+          left: 50%;
+          top: 0%;
+          transform: translate(-50% , -95%);
+          border: 3px solid #004650;
+          border-bottom: none;
+          background: #fff;
+          width: 15px;
+          height: 35px;
+          animation: fillNeck 2s linear infinite alternate;
+        }
 
-.loader.fade-out {
-  opacity: 0;
-  transition: opacity 0.3s ease-out;
-}
+        @keyframes fill {
+          0% { box-shadow: 0 0  inset }
+          50% , 100% { box-shadow: 0 -98px inset }
+        }
 
-/* 🔥 ЦВЕТ ТЕКСТА */
-.loader-title {
-  font-family: "Enthalpy298", serif;
-  font-size: 32px;
-  letter-spacing: 4%;
-  margin-bottom: 24px;
 
-  color: #FAAC6E; /* ← ВОТ ОН */
-}
-/* SPINNER */
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(250, 172, 110, 0.25);
-  border-top-color: #FAAC6E;
-  border-radius: 50%;
-
-  animation: spin 1s linear infinite;
-  -webkit-animation: spin 1s linear infinite;
-
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-@-webkit-keyframes spin {
-  from { -webkit-transform: rotate(0deg); }
-  to   { -webkit-transform: rotate(360deg); }
-}
-.loader.fade-out {
-  opacity: 0;
-  transition: opacity 0.3s ease-out;
-}
+        @keyframes fillNeck {
+          0% , 50%{ box-shadow: 0 0  inset }
+          100% { box-shadow: 0 -20px inset }
+        }
+    

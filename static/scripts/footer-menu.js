@@ -26,11 +26,10 @@ export function loadFooterMenu() {
 
     // === ICON ===
     const icon = document.createElement("div");
-    icon.className = "icon";
-
-    icon.style.maskImage = `url(icons/icon_${catId}.svg)`;
-    icon.style.webkitMaskImage = `url(icons/icon_${catId}.svg)`;
-
+    icon.className = "icon-mask";
+    const iconUrl = `/static/img/icons/icon_${catId}.svg`;
+    icon.style.setProperty("--icon-mask", `url("${iconUrl}")`);
+    console.log(iconUrl);
     catEl.appendChild(icon);
 
 /* заглушка, если иконки временно нет */
@@ -42,8 +41,30 @@ export function loadFooterMenu() {
 
     catEl.onclick = e => {
       e.stopPropagation();
-      renderSubcategories(category, subs);
+      const OFFSET = 120;
+      const categoryId = `${category}`.replace(/\s/g, "_");
+
+      // 1. скроллимся сразу
+      const target = document.getElementById(categoryId);
+        if (!target) return;
+
+        const y =
+          target.getBoundingClientRect().top +
+          window.pageYOffset -
+          OFFSET;
+
+        window.scrollTo({
+          top: y,
+          behavior: "smooth",
+        });
+
+      // 2. сохраняем активную категорию
+      localStorage.setItem("activeCategory", category);
+
+      // 3. рендерим подкатегории в header
+      // renderHeaderSubcategories(category, subs);
     };
+
 
     catWrap.appendChild(catEl);
 
@@ -55,33 +76,36 @@ export function loadFooterMenu() {
   function renderSubcategories(category, subs) {
     subWrap.innerHTML = "";
 
-    Object.entries(subs).forEach(([sub, low]) => {
-      const subEl = document.createElement("div");
-      subEl.className = "footer-subcategory";
-      subEl.textContent = sub;
+  Object.keys(subs).forEach(sub => {
+    const subEl = document.createElement("div");
+    subEl.className = "footer-subcategory";
+    subEl.textContent = sub;
 
-      subEl.onclick = () => {
-        const id = `${category}_${sub}`.replace(/\s/g, "_");
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-      };
+    subEl.onclick = () => {
+      const id = `${category}_${sub}`.replace(/\s/g, "_");
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    };
 
-      subWrap.appendChild(subEl);
+    subWrap.appendChild(subEl);
 
       // low-level categories
-      if (typeof low === "object") {
-        Object.keys(low).forEach(lowSub => {
-          const lowEl = document.createElement("div");
-          lowEl.className = "footer-subcategory";
-          lowEl.textContent = lowSub;
+      if (typeof low === "object" && !Array.isArray(low)) {
+        Object.keys(low)
+          .filter(key => key !== "items")
+          .forEach(lowSub => {
+            const lowEl = document.createElement("div");
+            lowEl.className = "footer-subcategory";
+            lowEl.textContent = lowSub;
 
-          lowEl.onclick = () => {
-            const id = `${category}_${sub}_${lowSub}`.replace(/\s/g, "_");
-            document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-          };
+        lowEl.onclick = () => {
+          const id = `${category}_${sub}_${lowSub}`.replace(/\s/g, "_");
+          document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      };
 
-          subWrap.appendChild(lowEl);
-        });
-      }
+      subWrap.appendChild(lowEl);
+    });
+}
+
     });
   }
 
@@ -112,9 +136,9 @@ export function loadFooterMenu() {
   window.addEventListener("scroll", () => {
     const currentY = window.scrollY;
 
-    if (currentY > lastScrollY + 5) {
+    if (currentY > lastScrollY + 7) {
       hideMenu();
-    } else if (currentY < lastScrollY - 5) {
+    } else if (currentY < lastScrollY - 7) {
       showMenu();
     }
 
@@ -123,5 +147,5 @@ export function loadFooterMenu() {
   });
 
   // ---------- idle show ----------
-  showTimeout = setTimeout(showMenu, 5000);
+  showTimeout = setTimeout(showMenu, 3000);
 }

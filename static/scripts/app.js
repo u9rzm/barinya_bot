@@ -91,28 +91,54 @@ async function loadBalance(token) {
     alert("Профиль в разработке");
   };
 }
-//🚀 BOOTSTRAP*
-function removeSplash() {
-  const splash = document.getElementById("splash");
-  if (!splash) return;
-  splash.remove(); // 🔥 без display:none
+/* =========================
+   🔄 LOADER (HATCH)
+========================= */
+
+function showLoader() {
+  const loaderElement = document.getElementById("loader");
+  if (loaderElement) {
+    loaderElement.style.display = "flex";
+    loaderElement.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <span class="loader"></span>
+        <p style="margin-top: 20px; color: var(--tg-theme-text-color, #e7f976ff); font-size: 16px;"></p>
+      </div>
+    `;
+  }
 }
-// ⏱ splash живёт ровно 1.1 сек
-setTimeout(removeSplash, 1100);
+
+function hideLoader() {
+  const loaderElement = document.getElementById("loader");
+  const contentElement = document.getElementById("content");
+  
+  if (loaderElement) {
+    loaderElement.style.display = "none";
+  }
+  if (contentElement) {
+    contentElement.style.display = "block";
+  }
+}
 
 import { getData } from "/static/scripts/get_data.js";
 import { loadTopMenu } from "/static/scripts/top-menu.js";
 import { loadContent } from "/static/scripts/content.js";
 import { loadFooterMenu } from "/static/scripts/footer-menu.js";
+
+
 // основной старт
 (async function initApp() {
   console.log("🚀 App init started");
+  
+  // Show loader at the beginning
+  showLoader();
+  
   try {
     await getData();
     loadTopMenu();
     loadFooterMenu();
     loadContent();
-    console.log("🚀 App init finished") ;
+    console.log("� Appo init finished") ;
     if (from_tg && tg) {
       user = tg.initDataUnsafe?.user || user;
 
@@ -126,6 +152,8 @@ import { loadFooterMenu } from "/static/scripts/footer-menu.js";
     console.error("❌ Init error:", e);
   } finally {
     console.log("✅ All loaded successfully");
+    // Hide loader when everything is done
+    hideLoader();
   }
 })();
 

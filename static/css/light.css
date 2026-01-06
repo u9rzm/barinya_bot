@@ -1,3 +1,13 @@
+/* 00535e - decorative elements. text зеленый светлый h
+004650 - backgound. зеленый темный h
+faac6e - ораньжевый основной h
+3b3b3c - темносерый почти черный */
+
+
+    /* --background_main: #E6E7E8;
+    --logo_main: #FAAC6E;
+    --decorative_main: #00535E;
+    --text_main: #3B3B3C; */
 
 header {
     background-color: #E6E7E882;
@@ -7,18 +17,15 @@ header {
 #header::after {  
     background-color: #e6e7e8d6;
 
-    /* background: linear-gradient(
-        to bottom,
-        #E6E7E882,
-        #e6e7e800
-  ); */
 }
 
-
+#header-center{
+    background-color: #00535e;
+    }
 
 body {
     background-color: #E6E7E8;
-    color: #3B3B3C;
+    color: #00535e;
 }
 
 
@@ -29,6 +36,21 @@ body {
 
 #top-menu {
     background: linear-gradient(to bottom, rgba(230,231,232,0.95), rgba(230,231,232,0));
+}
+
+/* IMAGES  decorative*/
+.footer-category::before {
+    background-color: #e9d1bc;
+}
+.imgCat {
+    background-color: #e9d1bc;
+}
+.subImg {
+    background-color: #e9d1bc;
+}
+
+.icon-mask {
+    background-color: #00535e;
 }
 
 .item {

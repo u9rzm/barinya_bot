@@ -1,17 +1,25 @@
 
+
+
+
+
+/* 
+    --background_main: #004650;
+    --logo_main: #FAAC6E;
+    --decorative_main: #00535E;
+    --text_main: #FAAC6E; */
+
 header {
     background-color: #00455082;
 }
 
 #header::after {
 background-color: #004550c4;
-/* background: linear-gradient(
-    to bottom,
-    #004550,
-    #00455000
-  ); */
 }
 
+#header-center{
+    background-color: #FAAC6E;
+    }
 
 body {
     background-color: #004650;
@@ -27,6 +35,23 @@ body {
 
 #top-menu {
     background: linear-gradient(to bottom, rgba(30,30,30,0.9), rgba(30,30,30,0));
+}
+
+/* IMAGES  decorative*/
+
+.footer-category::before {
+    background-color: #004650;
+}
+
+.imgCat {
+    background-color: #00535E;
+}
+.subImg {
+    background-color: #00535E;
+}
+
+.icon-mask {
+    background-color: #FAAC6E;
 }
 
 .item {

@@ -22,11 +22,10 @@ export function loadContent() {
   const raw = localStorage.getItem("data");
   if (!raw) return;
 
-  // const data = JSON.parse(raw);
   const data = normalizeData(JSON.parse(raw));
   menu.innerHTML = "";
 
-  Object.entries(data).forEach(([category, subs], idx) => {
+  Object.entries(data).forEach(([category, subs]) => {
     const catId = category.replace(/\s/g, "_");
 
     const section = document.createElement("section");
@@ -34,49 +33,54 @@ export function loadContent() {
 
     // ===== CATEGORY HEADER =====
     const catWrapper = document.createElement("div");
-    catWrapper.style.display = "flex";
-    catWrapper.style.alignItems = "center";
-    catWrapper.style.justifyContent = "space-between";
-    catWrapper.style.marginBottom = "12px";
+    catWrapper.className = "category-header";
 
-    const imgLeft = document.createElement("img");
-    imgLeft.src = `/static/img/category.svg`;
-    imgLeft.style.height = "40px";
+    const imgCatLeft = document.createElement("div");
+    imgCatLeft.className = "imgCat";
+    imgCatLeft.style.setProperty(
+      "--imgCat",
+      `url("/static/img/category.svg")`
+    );
 
     const title = document.createElement("h2");
     title.textContent = category;
-    title.style.flexGrow = "1";
-    title.style.textAlign = "center";
 
-    const imgRight = document.createElement("img");
-    imgRight.src = `/static/img/category.svg`;
-    imgRight.style.height = "40px";
+    const imgCatRight = document.createElement("div");
+    imgCatRight.className = "imgCat";
+    imgCatRight.style.setProperty(
+      "--imgCat",
+      `url("/static/img/category.svg")`
+    );
 
-    catWrapper.append(imgLeft, title, imgRight);
+    
+
+    catWrapper.append(imgCatLeft, title, imgCatRight);
     section.appendChild(catWrapper);
 
     // ===== SUBCATEGORIES =====
-    Object.entries(subs).forEach(([subcategory, tree], sidx) => {
+    Object.entries(subs).forEach(([subcategory, tree]) => {
       const subId = `${catId}_${subcategory.replace(/\s/g, "_")}`;
 
       const subTitle = document.createElement("h3");
       subTitle.id = subId;
       subTitle.textContent = subcategory;
 
-      const subImg = document.createElement("img");
-      subImg.src = `/static/img/subcategory.svg`;
-      subImg.style.display = "block";
-      subImg.style.margin = "6px auto 12px";
-      subImg.style.height = "30px";
 
-      section.append(subTitle, subImg);
+      const subImgcenter = document.createElement("div");
+      subImgcenter.className = "subImg";
+      subImgcenter.style.setProperty(
+        "--subImg",
+        `url("/static/img/subcategory.svg")`
+      );
 
+      section.append(subTitle, subImgcenter);
       renderTree(tree, section, 4);
     });
 
     menu.appendChild(section);
   });
 }
+
 
 /**
  * Рекурсивный рендер уровней sub_1 / sub_2 / ...
