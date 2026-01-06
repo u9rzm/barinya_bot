@@ -1,6 +1,5 @@
 """Menu service for managing menu items and categories."""
 from typing import Optional
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -8,7 +7,7 @@ from sqlalchemy.orm import selectinload
 from shared.models import MenuItem, MenuCategory
 
 
-class MenuService:
+class MenuService_db:
     """Service for managing menu items and categories."""
     
     def __init__(self, db: AsyncSession):
@@ -186,3 +185,93 @@ class MenuService:
         await self.db.refresh(menu_item)
         
         return menu_item
+
+#GOOGLE TABS
+import csv
+import json
+import os
+import httplib2
+from googleapiclient.discovery import build
+from oauth2client.service_account import ServiceAccountCredentials
+import re
+from pathlib import Path
+from shared.config import settings
+from shared.logging_config import get_logger
+
+
+logger = get_logger(__name__)
+
+def get_service_sacc(sheet_id, sheet_list_name):
+    # Берем ключ доступа из credentials.json для доступа к google sheet
+    creds_json: str = settings.google_sheets_credentials_file
+    scopes = ['https://www.googleapis.com/auth/spreadsheets']
+    
+    # авторизуемся и создаем сервис
+    creds_service = ServiceAccountCredentials.from_json_keyfile_name(creds_json, scopes).authorize(httplib2.Http())
+    service = build('sheets', 'v4', http=creds_service)
+        # получаем данные из таблицы
+    try:
+        resp = service.spreadsheets().values().batchGet(
+            spreadsheetId=sheet_id, 
+            ranges=[sheet_list_name]
+        ).execute()
+        
+        values = resp.get('valueRanges', [{}])[0].get('values', [])
+        
+        # проверяем, что есть данные
+        if not values or len(values) < 2:
+            return []
+    # возвращает dict (key value) всех значений из таблицы google sheet по id
+        headers = values[0]
+        return [dict(zip(headers, row + [''] * (len(headers) - len(row)))) for row in values[1:]]
+        
+    except Exception as e:        
+        logger.error(f"Ошибка при получении данных из Google Sheets: {e}")
+
+import json
+from pathlib import Path
+
+class MenuServiceGoogleTabs:
+    def __init__(self):
+        self.sheet_id = settings.google_sheets_spreadsheet_id
+        self.sheet_list_name = 'menu'
+        self.service = get_service_sacc(self.sheet_id, self.sheet_list_name)
+        self.menu_path = Path(settings.path_menu)
+
+    def generate_menu_json(self):
+        path = Path(self.menu_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        menu: dict = {}
+
+        for row in self.service:
+            category = row["category"]
+            subcategory = row["subcategory"]
+
+            # category
+            menu.setdefault(category, {})
+            menu[category].setdefault(subcategory, {})
+
+            current_level = menu[category][subcategory]
+
+            # собираем sub_1, sub_2, sub_3 ...
+            sub_levels = sorted(
+                k for k in row.keys()
+                if k.startswith("sub_") and row[k]
+            )
+
+            for level in sub_levels:
+                value = row[level]
+                current_level.setdefault(value, {})
+                current_level = current_level[value]
+
+            # items
+            current_level.setdefault("items", []).append({
+                "name": row.get("name"),
+                "weight": row.get("weight"),
+                "price": row.get("price"),
+                "description": row.get("description"),
+            })
+
+        with open(self.menu_path, "w", encoding="utf-8") as f:
+            json.dump(menu, f, ensure_ascii=False, indent=4)

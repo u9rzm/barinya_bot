@@ -5,8 +5,6 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/api/menu", tags=["menu"])
 
 MENU_PATH = Path("webapp/data/menu.csv")
-
-
 @router.get("")
 async def get_menu():
     menu = {}

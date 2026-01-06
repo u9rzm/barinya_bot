@@ -56,6 +56,13 @@ htmlcov/
 credentials.json
 token.json
 
+# Static data
+static/data/
+
+# TON reverse proxy
+ton-rproxy/*
+!ton-rproxy/Dockerfile
+
 # OS
 .DS_Store
 Thumbs.db

@@ -178,7 +178,7 @@ async def show_menu_callback(callback: CallbackQuery) -> None:
             return
     
     # Create keyboard with Mini App button for menu
-    menu_url = 'https://workflow.chickenkiller.com/app'  # Replace with actual Mini App URL
+    menu_url = 'https://quantumforge.ton.run'  # Replace with actual Mini App URL
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -225,7 +225,7 @@ async def show_profile_callback(callback: CallbackQuery) -> None:
                 return
         
         # Create keyboard with Mini App button for profile
-        profile_url = "https://workflow.chickenkiller.com/profile"  # Replace with actual Mini App URL @hsfgjfsfhdfsqef_bot
+        profile_url = "https://quantumforge.ton.run/profile"  # Replace with actual Mini App URL @hsfgjfsfhdfsqef_bot
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [

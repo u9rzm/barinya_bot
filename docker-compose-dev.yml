@@ -56,7 +56,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     volumes:
       - ./webapp:/app/webapp
-      - ./shared:/app/shared
+      - ./shared:/app/shared:ro
       - ./logs:/app/logs
       - ./credentials.json:/app/credentials.json:ro
     # Внешний порт закрыт - доступ только через nginx
@@ -89,31 +89,28 @@ services:
       
       # Telegram Bot
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-}
-      
+      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-}      
       # Admin
-      ADMIN_TELEGRAM_IDS: ${ADMIN_TELEGRAM_IDS}
-      
+      ADMIN_TELEGRAM_IDS: ${ADMIN_TELEGRAM_IDS}      
       # Application
       APP_HOST: 0.0.0.0
       APP_PORT: 8001
       DEBUG: ${DEBUG:-False}
       
       # JWT
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-secret}
-      
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-secret}      
       # Google Sheets (optional)
       GOOGLE_SHEETS_CREDENTIALS_FILE: ${GOOGLE_SHEETS_CREDENTIALS_FILE:-}
       GOOGLE_SHEETS_SPREADSHEET_ID: ${GOOGLE_SHEETS_SPREADSHEET_ID:-}
-      GOOGLE_SHEETS_RANGE: ${GOOGLE_SHEETS_RANGE:-Menu!A2:F}
-      
+      GOOGLE_SHEETS_RANGE: ${GOOGLE_SHEETS_RANGE:-Menu!A2:F}      
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     volumes:
       - ./bot:/app/bot
       - ./shared:/app/shared
       - ./logs:/app/logs
-      - ./credentials.json:/app/credentials.json:ro
+      - ./secret/credentials.json:/secret/credentials.json:ro
+      - ./static/data:/data
     networks:
       - bar-bot-network
     depends_on:
@@ -132,23 +129,39 @@ services:
     image: nginx:alpine
     container_name: telegram-bar-bot-nginx
     volumes:
-      - ./static:/static:ro
+      - ./static:/var/www/app/static:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /opt/ssl-backup/certs/workflow.chickenkiller.com:/etc/nginx/ssl:ro
-      - /var/log/nginx:/var/log/nginx
+      - ./logs/nginx:/var/log/nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "127.0.0.1:80:80"
+      - "127.0.0.1:443:443"
+    # expose:
+    #   - "80"
+    #   - "443"
     networks:
       - bar-bot-network
     depends_on:
       - webapp
     restart: unless-stopped
 
+  # #ton-rproxy
+  ton-reverse-proxy:
+    build: ./ton-rproxy
+    container_name: ton-reverse-proxy
+    network_mode: host
+    volumes:
+      - ./ton-rproxy/config.json:/app/config.json:ro
+    command: 
+    restart: unless-stopped
+    # networks:
+    #   - bar-bot-network
+
 volumes:
   postgres_data:
     driver: local
+    
 
 networks:
   bar-bot-network:

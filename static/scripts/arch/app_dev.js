@@ -99,18 +99,16 @@ function removeSplash() {
 }
 // ⏱ splash живёт ровно 1.1 сек
 setTimeout(removeSplash, 1100);
-
-import { getData } from "/static/scripts/get_data.js";
-import { loadTopMenu } from "/static/scripts/top-menu.js";
-import { loadContent } from "/static/scripts/content.js";
-import { loadFooterMenu } from "/static/scripts/footer-menu.js";
+// основной старт
+import { getData } from "/static/get_data.js";
+import { loadTopMenu } from "/static/top-menu.js";
+import { loadContent } from "/static/content.js";
 // основной старт
 (async function initApp() {
   console.log("🚀 App init started");
   try {
     await getData();
     loadTopMenu();
-    loadFooterMenu();
     loadContent();
     console.log("🚀 App init finished") ;
     if (from_tg && tg) {

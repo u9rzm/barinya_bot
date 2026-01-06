@@ -1,7 +1,7 @@
 document.getElementById("profile-form").onsubmit = async e => {
   e.preventDefault();
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("access_token");
   const data = Object.fromEntries(new FormData(e.target));
 
   await fetch("/api/profile", {

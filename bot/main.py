@@ -2,6 +2,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
@@ -15,6 +16,7 @@ from aiohttp.web_app import Application
 from shared.config import settings
 from shared.database import get_async_session
 from shared.logging_config import setup_logging, get_logger
+from shared.services.menu_service import MenuServiceGoogleTabs
 from bot.handlers import register_handlers
 from bot.middleware import LoggingMiddleware
 
@@ -40,6 +42,13 @@ async def on_startup() -> None:
     
     # Register handlers
     register_handlers(dp)
+    #check menu file
+    if os.path.exists(settings.path_menu):
+        logger.info("Menu file exists")
+    else:
+        logger.info("Menu file does not exist")
+        MenuServiceGoogleTabs().generate_menu_json()
+        logger.info("Menu file created")
     
     # Set webhook if URL is provided
     if settings.telegram_webhook_url:

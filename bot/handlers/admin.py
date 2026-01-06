@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.config import settings
 from shared.database import get_async_session
 from shared.services import (
-    MenuService, PromotionService, UserService, 
+    MenuService_db, PromotionService, UserService, 
     LoyaltyService, NotificationService
 )
 from shared.models import MenuCategory

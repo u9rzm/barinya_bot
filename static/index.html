@@ -3,48 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <title>Bar Menu</title>
-    <script src="https://workflow.chickenkiller.com/static/scripts/cache-buster.js"></script>
+    <!-- <script src="/static/scripts/cache-buster.js"></script> -->
     <!-- Telegram SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script data-cache data-src="/static/scripts/app.js"></script>
-    <script data-cache data-src="/static/scripts/menu.js"></script>
-    
-    <!-- Theme -->
-    <link id="theme-style" rel="stylesheet" href="https://workflow.chickenkiller.com/static/css/light.css">
-    <link rel="stylesheet" href="https://workflow.chickenkiller.com/static/css/base.css">
-    <link rel="stylesheet" href="https://workflow.chickenkiller.com/static/css/loader.css">
-    <script src="https://workflow.chickenkiller.com/static/scripts/font-test.js"></script>
-    
-
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Theme -->
+    <link rel="stylesheet" rel="stylesheet" href="/static/css/base.css">
+    <link id="theme-style" rel="stylesheet" href="/static/css/light.css">    
+    <link id="theme-style" rel="stylesheet" href="/static/css/menu.css">    
+    <!-- <link rel="stylesheet" href="/static/css/loader.css"> -->
+    <script type="module" src="/static/scripts/app.js" defer></script>  
+
 </head>
 <body>
 
 <!-- SPLASH -->
+
 <div id="splash">
   <div class="splash-content">
     <div class="splash-logo">БАРЫНЯ</div>
   </div>
 </div>
 
-<header>
-  <div id="user-info"></div>
-  <button id="menu-btn">☰</button>
+<header id="header">
+  <div id="header-center">
+    <img src="/static/img/logo.svg" alt="Барыня" width="150" height="50">
+  </div>
+<div id="menu-btn"></div>
 </header>
-
-<nav id="side-menu"></nav>
-
-<main id="menu"></main>
-
+<div id="top-menu"></div>
+<main>
+<div id="menu"></div></div>
+</main>
 <footer>
-  <div id="footer-info"></div>
+  <div id="footer-menu">
+  <div id="footer-categories"></div>
+  <div id="footer-subcategories"></div>
+</div>
 </footer>
-
-
-
-<!-- <script src="/static/scripts/cache-buster.js"></script> -->
-
+ 
 
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://unpkg.com/postprocessing@6.29.1/build/postprocessing.js"></script>

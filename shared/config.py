@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     debug: bool = False
     
 
-    
+    path_menu: str = "/data/menu.json"
 
     # Google Sheets (optional)
     google_sheets_credentials_file: str | None = None

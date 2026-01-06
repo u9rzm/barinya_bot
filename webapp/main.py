@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.config import settings
 from shared.database import init_db, get_db
-from shared.services.menu_service import MenuService
+# from shared.services.menu_service import MenuService
 from shared.services.user_service import UserService
 from shared.logging_config import setup_logging, get_logger
 from shared.error_handlers import setup_error_handlers
@@ -17,7 +17,7 @@ from shared.error_handlers import setup_error_handlers
 from webapp.middleware.auth import JWTAuthMiddleware,  get_current_telegram_user
 from webapp.routers import auth
 
-from webapp.routers import user, loyalty, referral, menu, order
+from webapp.routers import user, loyalty, referral, order
 
 from typing import Optional
 from fastapi import HTTPException
@@ -44,7 +44,7 @@ app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(loyalty.router)
 app.include_router(referral.router)
-app.include_router(menu.router)
+# app.include_router(menu.router)
 app.include_router(order.router)
 
 # Setup static files
@@ -87,22 +87,6 @@ async def health():
     return {"status": "healthy"}
 
 
-@app.get("/static/version.txt")
-async def get_cache_version():
-    """Get current cache version for cache busting."""
-    try:
-        # Пытаемся прочитать версию из файла
-        with open("/app/static_version.txt", "r") as f:
-            version = f.read().strip()
-    except FileNotFoundError:
-        # Если файла нет, создаем новую версию
-        import time
-        version = str(int(time.time()))
-        with open("/app/static_version.txt", "w") as f:
-            f.write(version)
-    
-    from fastapi.responses import PlainTextResponse
-    return PlainTextResponse(version)
 @app.post("/api/clear-cache")
 async def clear_cache(
     request: Request,

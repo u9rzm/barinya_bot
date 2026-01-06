@@ -1,160 +1,47 @@
 
-
-
-/* =========================
-   Base
-========================= */
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+header {
+    background-color: #00455082;
 }
+
+#header::after {
+background-color: #004550c4;
+/* background: linear-gradient(
+    to bottom,
+    #004550,
+    #00455000
+  ); */
+}
+
 
 body {
     background-color: #004650;
     color: #FAAC6E;
-    font-family: "TTHoves", sans-serif;
-    line-height: 1.4;
 }
 
 
-
-/* =========================
-   Header
-========================= */
-
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: #3B3B3C;
-}
-
-#user-info {
-    font-family: "FuturaNewCondBook", "Arial", sans-serif;
-    font-size: 16px;
-}
 
 #menu-btn {
-    background: none;
-    border: none;
-    color: #FAAC6E;
-    font-size: 22px;
-    cursor: pointer;
+  background-color: #FAAC6E; /* цвет иконки */
 }
 
-/* =========================
-   Side Menu
-========================= */
 
-nav {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 260px;
-    height: 100%;
-    background-color: #3B3B3C;
-    border-left: 1px solid #004650;
-    padding: 20px;
-    overflow-y: auto;
+#top-menu {
+    background: linear-gradient(to bottom, rgba(30,30,30,0.9), rgba(30,30,30,0));
 }
-
-nav.hidden {
-    display: none;
-}
-
-nav .category {
-    font-family: "Enthalpy298", "Times New Roman", serif;
-    font-size: 20px;
-    margin-bottom: 12px;
-    cursor: pointer;
-}
-
-/* =========================
-   Menu Content
-========================= */
-
-main {
-    padding: 16px;
-}
-
-section {
-    margin-bottom: 32px;
-}
-
-/* Category title */
-h2 {
-    font-family: "Enthalpy298", "Times New Roman", serif;
-    font-size: 28px;
-    margin-bottom: 12px;
-    margin: 24px 0 12px;
-    letter-spacing: 0.05em;
-    text-align: center;
-}
-
-/* Subcategory title */
-h3 {
-    font-family: "FuturaNewCondBook", "Arial", sans-serif;
-    font-size: 20px;
-    color: #FAAC6E;
-    margin: 16px 0 8px;
-    opacity: 0.9;
-    text-align: center;
-    border: 1px solid rgba(250, 172, 110, 0.25);
-    background: #e9d1bc;
-    padding: 12px;
-    border-radius: 14px;
-}
-
-/* =========================
-   Menu Item
-========================= */
 
 .item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 8px 0;
     border-bottom: 1px solid rgba(250, 172, 110, 0.15);
 }
 
-.item-info {
-    flex: 1;
-    margin-right: 12px;
-}
-
-.item-name {
-    font-family: "FuturaNewCondBook", "Arial", sans-serif;
-    font-size: 16px;
-    margin-bottom: 2px;
-}
-
-.item-description {
-    font-family: "TTHoves";
-    font-size: 13px;
-    opacity: 0.85;
-    line-height: 1.3;
-}
-
 .item-price {
-    font-family: "TTHoves";
-    font-size: 14px;
     color: #FAAC6E;
-    font-weight: 500;
-    white-space: nowrap;
 }
 
-/* =========================
-   Links & Buttons
-========================= */
+h3 {
+    color: #FAAC6E;
+    /* background: #3B3B3C; */
+}
 
 a {
     color: #FAAC6E;
-    text-decoration: none;
-}
-
-a:hover {
-    color: #004650;
 }
