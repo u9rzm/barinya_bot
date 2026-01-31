@@ -29,7 +29,7 @@ class LoggerSetup:
     def setup_logging(self) -> None:
         """Setup comprehensive logging configuration."""
         # Get log level from settings
-        log_level = self.log_levels.get(settings.log_level.upper(), logging.INFO)
+        log_level = self.log_levels.get(settings.log_level.upper())
         
         # Create formatters
         detailed_formatter = logging.Formatter(

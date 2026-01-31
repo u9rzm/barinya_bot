@@ -2,19 +2,17 @@
 from datetime import datetime
 from enum import Enum
 from typing import Optional
-
 from sqlalchemy import ForeignKey, String, Float, Integer, Boolean, DateTime, Text, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from shared.database import Base
-
+from pydantic import BaseModel
 
 class OrderStatus(str, Enum):
     """Order status enumeration."""
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
-
 
 class User(Base):
     """User model."""

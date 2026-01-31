@@ -4,17 +4,18 @@ import logging
 from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.config import settings
 from shared.database import init_db, get_db
+from shared.redis import init_redis
 # from shared.services.menu_service import MenuService
 from shared.services.user_service import UserService
 from shared.logging_config import setup_logging, get_logger
 from shared.error_handlers import setup_error_handlers
 
-from webapp.middleware.auth import JWTAuthMiddleware,  get_current_telegram_user
+from webapp.middleware.auth import AuthMiddleware, get_current_telegram_user
 from webapp.routers import auth
 
 from webapp.routers import user, loyalty, referral, order
@@ -37,7 +38,7 @@ app = FastAPI(
 setup_error_handlers(app)
 
 # Add Telegram Web App authentication middleware
-app.add_middleware(JWTAuthMiddleware)
+app.add_middleware(AuthMiddleware)
 
 # Include API routers
 app.include_router(auth.router)
@@ -52,7 +53,6 @@ app.include_router(order.router)
 
 # Setup Jinja2 templates
 templates = Jinja2Templates(directory="webapp/templates")
-
 
 # @app.middleware("http")
 # async def no_cache_miniapp(request: Request, call_next):
@@ -69,6 +69,9 @@ async def startup_event():
     # Initialize database tables
     await init_db()
     logger.info("Database initialized")
+    await init_redis()
+    logger.info("Cache initialized")
+    
 
 
 @app.get("/")
@@ -128,27 +131,27 @@ async def clear_cache(
 
 
 
-# Template routes for Mini App pages
-@app.get("/app")
-async def app_entry(request: Request):
-    """Main app entry point."""
-    try:
-        logger.info(f"App entry request from {request.client.host if request.client else 'unknown'}")
-        logger.info(f"Request path: {request.url.path}")
-        logger.info(f"Request headers: {dict(request.headers)}")
+# # Template routes for Mini App pages
+# @app.get("/app")
+# async def app_entry(request: Request):
+#     """Main app entry point."""
+#     try:
+#         logger.info(f"App entry request from {request.client.host if request.client else 'unknown'}")
+#         logger.info(f"Request path: {request.url.path}")
+#         logger.info(f"Request headers: {dict(request.headers)}")
         
-        response = templates.TemplateResponse(
-            "index.html",
-            {"request": request}
-        )
-        logger.info("Successfully rendered index.html template")
-        return response
+#         response = templates.TemplateResponse(
+#             "index.html",
+#             {"request": request}
+#         )
+#         logger.info("Successfully rendered index.html template")
+#         return response
         
-    except Exception as e:
-        logger.error(f"Error in app_entry: {e}", exc_info=True)
-        logger.error(f"Template directory: webapp/templates")
-        logger.error(f"Looking for: index.html")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+#     except Exception as e:
+#         logger.error(f"Error in app_entry: {e}", exc_info=True)
+#         logger.error(f"Template directory: webapp/templates")
+#         logger.error(f"Looking for: index.html")
+#         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @app.get("/profile", response_class=HTMLResponse)

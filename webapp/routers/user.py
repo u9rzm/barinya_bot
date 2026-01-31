@@ -23,8 +23,7 @@ async def get_user_profile(
     telegram_user: dict = Depends(get_current_telegram_user)
 ):
     """
-    Get user profile information.
-    
+    Get user profile information.    
     Returns complete user profile including loyalty level and points.
     Validates: Requirements 7.1
     """

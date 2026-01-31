@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+#Infrastructure
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
@@ -23,7 +24,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  #Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: telegram-bar-bot-redis
+    environment:
+      REDIS_PORT: ${REDIS_PORT:-6379} 
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-barbot_password}  
+    expose:
+      - "${REDIS_PORT:-6379}"
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - bar-bot-network  
+    # volumes:
+    #   - redis_data:/data
+    # command: sh -c "redis-server --requirepass $REDIS_PASSWORD"   
+#Backend
   # Web Application (FastAPI)
   webapp:
     build:
@@ -34,7 +51,10 @@ services:
     environment:
       # Database
       DATABASE_URL: postgresql+asyncpg://barbot:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
-      
+      #redis
+      REDIS_HOST: ${REDIS_HOST:-redis} 
+      REDIS_PORT: ${REDIS_PORT:-6379} 
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-barbot_password}
       # Telegram Bot
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       
@@ -110,7 +130,7 @@ services:
       - ./shared:/app/shared
       - ./logs:/app/logs
       - ./secret/credentials.json:/secret/credentials.json:ro
-      - ./static/data:/data
+      - ./src/static/data:/data
     networks:
       - bar-bot-network
     depends_on:
@@ -124,12 +144,16 @@ services:
       retries: 3
       start_period: 40s
 
+
+
+#web servers and proxy
   # Nginx Reverse Proxy (for SSL termination)
   nginx:
     image: nginx:alpine
     container_name: telegram-bar-bot-nginx
     volumes:
-      - ./static:/var/www/app/static:ro
+      - ./src/static:/var/www/app/static:ro
+      - ./src/public:/var/www/app/public:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /opt/ssl-backup/certs/workflow.chickenkiller.com:/etc/nginx/ssl:ro
@@ -157,6 +181,9 @@ services:
     restart: unless-stopped
     # networks:
     #   - bar-bot-network
+
+
+
 
 volumes:
   postgres_data:

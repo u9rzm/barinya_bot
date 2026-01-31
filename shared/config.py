@@ -39,11 +39,19 @@ class Settings(BaseSettings):
     #JWT
     jwt_secret_key: str
     
+    #Redis 
+    session_ttl: int = 7200
+    session_max_lifetime: int = 86400
+    redis_host: str = 'redis'
+    redis_port: int = 6783
+    redis_password: str = "some_passw9832983"
+
     # Logging
     log_level: str = "DEBUG"
     log_to_file: bool = True
     log_max_size_mb: int = 10
     log_backup_count: int = 5
+
     
     @property
     def admin_ids_list(self) -> list[int]:

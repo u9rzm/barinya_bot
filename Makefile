@@ -192,3 +192,14 @@ bust-cache:
 	docker-compose -f $(COMPOSE_FILE) exec webapp sh -c "find /app/webapp/static -name '*.css' -o -name '*.js' | head -5" || true
 	@make clear-nginx-cache
 	@echo "$(GREEN)Кеш браузера будет очищен при следующем обновлении!$(NC)"
+
+
+
+
+#docker run -it --rm --entrypoint sh node:24-alpine
+# Остановка всех сервисов
+.PHONY: up-ton-dev
+up-ton-dev:
+	@echo "$(YELLOW)Остановка всех сервисов...$(NC)"
+	docker run -it --rm -v ./ton:/ton --entrypoint sh node:24-alpine
+	@echo "$(GREEN)Сервисы остановлены!$(NC)"

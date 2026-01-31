@@ -133,6 +133,7 @@ class OrderResponse(BaseModel):
         from_attributes = True
 
 
+
 class OrderCreateRequest(BaseModel):
     """Order creation request schema."""
     items: list[dict]  # [{"menu_item_id": int, "quantity": int, "price": float}]

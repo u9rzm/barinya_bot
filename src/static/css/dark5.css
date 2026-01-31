@@ -1,0 +1,90 @@
+
+
+header {
+    background-color: #00455038;
+}
+
+#header::after {
+background-color: #00455078;
+}
+
+#header-center{
+    background-color: #FAAC6E;
+    }
+
+body {
+    background-color: #004650;
+    color: #FAAC6E;
+    
+    /* background: linear-gradient(#00535E 1px, transparent 1px),
+    linear-gradient(90deg, #00535E 1px, transparent 1px),
+    repeating-linear-gradient(
+      45deg,
+      rgba(0, 255, 170, 0.05) 0px 1px,
+      transparent 1px 12px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0, 255, 170, 0.05) 0px 1px,
+      transparent 1px 12px
+    ),
+    radial-gradient(circle at center, #004650 100%, #004650 100%);
+  background-size:
+    28px 28px,
+    28px 28px,
+    50px 50px,
+    50px 50px,
+    cover;
+  border: 1px solid rgba(0, 255, 170, 0.1);
+  box-shadow:
+    inset 0 0 40px rgba(0, 255, 170, 0.1),
+    0 0 60px rgba(0, 255, 170, 0.15);
+  transform-style: preserve-3d;
+  transition: all 0.6s ease-in-out;
+  position: relative; */
+
+}
+
+
+#menu-btn {
+  background-color: #FAAC6E; /* цвет иконки */
+}
+
+
+#top-menu {
+    background: linear-gradient(to bottom, rgba(30,30,30,0.9), rgba(30,30,30,0));
+}
+
+/* IMAGES  decorative*/
+
+/* .footer-category::before {
+    background-color: #004650;
+} */
+
+.imgCat {
+    background-color: #00535E;
+}
+.subImg {
+    background-color: #00535E;
+}
+
+.icon-mask {
+    background-color: #FAAC6E;
+}
+
+.item {
+    border-bottom: 1px solid rgba(250, 172, 110, 0.15);
+}
+
+.item-price {
+    color: #FAAC6E;
+}
+
+h3 {
+    color: #FAAC6E;
+    /* background: #3B3B3C; */
+}
+
+a {
+    color: #FAAC6E;
+}

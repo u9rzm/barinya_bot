@@ -1,0 +1,142 @@
+/* ===== FOOTER MENU CONTAINER ===== */
+
+#footer-menu {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== CATEGORIES ROW ===== */
+
+#footer-categories {
+  display: flex;
+
+  justify-content: center;
+  border-radius: 50%;
+  gap: 1px; 
+}
+
+/* ===== CATEGORY BUTTON ===== */
+
+.footer-category {
+  position: relative;
+  margin: 7px;
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  pointer-events: auto;
+
+  transform: translateY(90px);
+  opacity: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent; /* mobile */
+  transition:
+    transform 0.35s ease,
+    opacity 0.35s ease,
+    background-color 0.2s ease;
+}
+
+.footer-category.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* .footer-category:hover {
+  background: #faad6eb4;
+} */
+.footer-category:focus,
+.footer-category:active {
+  outline: none;
+}
+
+.footer-category::before {
+  content: "";
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+
+  border: 1px solid #FAAC6E;
+  border-radius: 50%;
+
+  /* transform: rotate(45deg) scale(1.1); */
+  transform-origin: center;
+
+  pointer-events: none;
+
+  opacity: 0.8;
+  transition:
+    opacity 0.2s ease,
+    transform 0.25s ease;
+}
+
+/* .footer-category:hover::before {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
+} */
+
+
+/* ===== ICON (MASK) ===== */
+
+.icon-mask {
+  width: 80px;
+  height: 80px;
+
+  background-color: #FAAC6E;
+  -webkit-mask: var(--icon-mask) no-repeat center / contain;
+  mask: var(--icon-mask) no-repeat center / contain;
+}
+.icon-mask:hover {
+
+  transform:  scale(1.1);
+}
+/* ===== SUBCATEGORIES (ABOVE ICONS) ===== */
+
+#footer-subcategories {
+  margin-bottom: 12px; /* ⬅️ ВАЖНО: сверху от иконок */
+  max-width: 90vw;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  order: -1;
+
+  pointer-events: auto;
+}
+
+/* ===== SUBCATEGORY BUTTON ===== */
+
+#footer-subcategories a,
+.footer-subcategory {
+  font-family: "FuturaNewCondBook", "Arial", sans-serif;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 4px;
+
+  background: #1f1f1f;
+  color: #fff;
+  cursor: pointer;
+
+  transition: background-color 0.2s ease;
+}
+
+#footer-subcategories a:hover,
+.footer-subcategory:hover {
+  background: #2c2c2c;
+}
