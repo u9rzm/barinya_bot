@@ -42,18 +42,20 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /opt/venv /opt/venv
 
 # Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN groupadd -r appgroup && useradd -r -g appgroup -u 1000 appuser
 
 # Create application directory
 WORKDIR /app
 
 # Copy application code
-COPY . .
+COPY ./webapp /app/webapp
+COPY ./shared /app/shared
+COPY ./secret/credentials.json /app/credentials.json
 
-# Create logs directory and set permissions
-RUN mkdir -p logs && \
-    chown -R appuser:appuser /app && \
-    chmod 755 logs
+# Create logs directory and set permissions App
+RUN mkdir -p /app/logs && \
+    chown -R appuser:appgroup /app && \
+    chmod 755 /app/logs
 
 # Switch to non-root user
 USER appuser

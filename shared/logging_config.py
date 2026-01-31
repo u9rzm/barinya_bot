@@ -17,6 +17,7 @@ class LoggerSetup:
         self.log_dir = Path("logs")
         self.log_dir.mkdir(exist_ok=True)
         
+        
         # Define log levels
         self.log_levels = {
             "DEBUG": logging.DEBUG,
@@ -57,7 +58,7 @@ class LoggerSetup:
         
         # Main application log file with rotation
         app_handler = logging.handlers.RotatingFileHandler(
-            filename=self.log_dir / "app.log",
+            filename=self.log_dir / 'app.log',
             maxBytes=10 * 1024 * 1024,  # 10MB
             backupCount=5,
             encoding='utf-8'

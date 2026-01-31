@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean
 
 # Create non-root user for security
-RUN groupadd -r botuser && useradd -r -g botuser botuser
+RUN groupadd -r appgroup && useradd -r -g appgroup -u 1000 appuser
 
 # Create application directory
 WORKDIR /app
@@ -25,15 +25,21 @@ RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY ./bot /app/bot/
+COPY ./shared /app/shared/
+COPY ./secret/credentials.json /secret/credentials.json
 
-# Create logs directory and set permissions
-RUN mkdir -p logs && \
-    chown -R botuser:botuser /app && \
-    chmod 755 logs
+# Create logs directory and set permissions Bot
+RUN mkdir -p /app/logs && \
+    mkdir -p /data && \
+    chown -R appuser:appgroup /app/logs && \
+    chown -R appuser:appgroup /data && \
+    chown -R appuser:appgroup /app && \
+    chmod 755 /app/logs && \
+    chmod 755 /data
 
 # Switch to non-root user
-USER botuser
+USER appuser
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
