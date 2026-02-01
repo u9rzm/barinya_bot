@@ -26,7 +26,7 @@ async function auth(tg_init_data) {
 
   const stored = localStorage.getItem("access_token");
   if (stored) {
-    const check = await fetch("https://quantumforge.ton.run/api/auth/check", {
+    const check = await fetch("/api/auth/check", {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${stored}`,
@@ -44,7 +44,7 @@ async function auth(tg_init_data) {
     throw new Error("initData is empty");
   }
   console.log(tg_init_data);
-  const res = await fetch(`https://quantumforge.ton.run/api/auth?initData=${encodeURIComponent(tg_init_data)}`,
+  const res = await fetch(`/api/auth?initData=${encodeURIComponent(tg_init_data)}`,
    {
     method: "GET",
     headers: { "Content-Type": "application/json" },
