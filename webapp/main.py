@@ -14,11 +14,12 @@ from shared.redis import init_redis
 from shared.services.user_service import UserService
 from shared.logging_config import setup_logging, get_logger
 from shared.error_handlers import setup_error_handlers
+from shared.services.scheduler_service import scheduler
 
 from webapp.middleware.auth import AuthMiddleware, get_current_telegram_user
 from webapp.routers import auth
 
-from webapp.routers import user, loyalty, referral, order
+from webapp.routers import user, loyalty, referral, order, wallet
 
 from typing import Optional
 from fastapi import HTTPException
@@ -47,6 +48,7 @@ app.include_router(loyalty.router)
 app.include_router(referral.router)
 # app.include_router(menu.router)
 app.include_router(order.router)
+app.include_router(wallet.router)
 
 # Setup static files
 # app.mount("/static", StaticFiles(directory="webapp/static"), name="static")
@@ -71,6 +73,19 @@ async def startup_event():
     logger.info("Database initialized")
     await init_redis()
     logger.info("Cache initialized")
+    
+    # Start background scheduler
+    await scheduler.start()
+    logger.info("Background scheduler started")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on application shutdown."""
+    logger.info("Shutting down application...")
+    # Stop background scheduler
+    await scheduler.stop()
+    logger.info("Background scheduler stopped")
     
 
 
@@ -127,6 +142,39 @@ async def clear_cache(
         }
     except Exception as e:
         logger.error(f"Error clearing cache: {e}", exc_info=True)
+        return {"error": str(e), "status": "error"}
+
+
+@app.post("/api/sync-wallets")
+async def sync_wallets_manually(
+    request: Request,
+    telegram_user: dict = Depends(get_current_telegram_user)
+):
+    """Manually trigger wallet synchronization (admin only)."""
+    try:
+        logger.info(f"Manual wallet sync request from user: {telegram_user}")
+        
+        # Проверяем, что пользователь админ
+        user_id = telegram_user.get("id")
+        admin_ids = [int(id.strip()) for id in settings.admin_telegram_ids.split(",") if id.strip()]
+        
+        if user_id not in admin_ids:
+            logger.warning(f"Access denied for user {user_id} to sync wallets")
+            return {"error": "Access denied", "status": "error"}
+        
+        # Запускаем синхронизацию
+        result = await scheduler.run_wallet_sync_now()
+        
+        logger.info(f"Manual wallet sync completed by admin {user_id}")
+        
+        return {
+            "status": "success",
+            "message": "Wallet synchronization completed",
+            "result": result
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in manual wallet sync: {e}", exc_info=True)
         return {"error": str(e), "status": "error"}
 
 

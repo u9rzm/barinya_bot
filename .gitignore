@@ -6,7 +6,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+mate.yml
 downloads/
 eggs/
 .eggs/
@@ -56,12 +56,21 @@ htmlcov/
 credentials.json
 token.json
 
-# Static data
-static/data/
+# Artifacts
+artifacts/
+menu.json
 
 # TON reverse proxy
 ton-rproxy/*
 !ton-rproxy/Dockerfile
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
 
 # OS
 .DS_Store

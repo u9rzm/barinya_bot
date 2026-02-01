@@ -30,9 +30,7 @@ class UserService:
     async def create_user(
         self,
         telegram_id: int,
-        username: Optional[str] = None,
-        first_name: Optional[str] = None,
-        last_name: Optional[str] = None,
+        wallet: Optional[str] = None,
         referrer_id: Optional[int] = None,
     ) -> User:
         """
@@ -40,9 +38,7 @@ class UserService:
         
         Args:
             telegram_id: Telegram user ID
-            username: Telegram username
-            first_name: User's first name
-            last_name: User's last name
+            wallet: TON wallet address
             referrer_id: ID of the user who referred this user
             
         Returns:
@@ -92,9 +88,7 @@ class UserService:
                 # Create user
                 user = User(
                     telegram_id=telegram_id,
-                    username=username,
-                    first_name=first_name,
-                    last_name=last_name,
+                    wallet=wallet,
                     referrer_id=referrer_id,
                     referral_code=referral_code,
                     loyalty_level_id=default_level.id,
@@ -112,7 +106,7 @@ class UserService:
             user = await retry_database_operation(_create_user_operation)
             
             # Log user creation
-            logger.info(f"Created new user: telegram_id={telegram_id}, username={username}")
+            logger.info(f"Created new user: telegram_id={telegram_id}, wallet={wallet}")
             if referrer_id:
                 logger.info(f"User {telegram_id} referred by user {referrer_id}")
             
@@ -164,12 +158,12 @@ class UserService:
         )
         return result.scalar_one_or_none()
     
-    async def get_user_by_username(self, username: str) -> Optional[User]:
+    async def get_user_by_wallet(self, wallet: str) -> Optional[User]:
         """
-        Get user by username.
+        Get user by wallet address.
         
         Args:
-            username: Telegram username
+            wallet: TON wallet address
             
         Returns:
             User object or None if not found
@@ -177,9 +171,50 @@ class UserService:
         result = await self.db.execute(
             select(User)
             .options(selectinload(User.loyalty_level))
-            .where(User.username == username)
+            .where(User.wallet == wallet)
         )
         return result.scalar_one_or_none()
+    
+    async def update_user_wallet(self, user_id: int, wallet: str) -> None:
+        """
+        Update user's wallet address.
+        
+        Args:
+            user_id: User ID
+            wallet: New wallet address
+            
+        Raises:
+            NotFoundError: If user not found
+            DatabaseError: If database operation fails
+        """
+        try:
+            async def _update_wallet_operation():
+                result = await self.db.execute(
+                    select(User).where(User.id == user_id)
+                )
+                user = result.scalar_one_or_none()
+                if not user:
+                    raise NotFoundError("User", user_id)
+                
+                old_wallet = user.wallet
+                user.wallet = wallet
+                await self.db.flush()
+                
+                return old_wallet
+            
+            old_wallet = await retry_database_operation(_update_wallet_operation)
+            
+            # Log wallet change
+            logger.info(f"Updated user {user_id} wallet: {old_wallet} -> {wallet}")
+            
+        except (NotFoundError, DatabaseError):
+            raise
+        except SQLAlchemyError as e:
+            logger.error(f"Database error updating user {user_id} wallet: {e}")
+            raise DatabaseError("Failed to update user wallet", e)
+        except Exception as e:
+            logger.error(f"Unexpected error updating user {user_id} wallet: {e}")
+            raise DatabaseError("Unexpected error during wallet update", e)
     
     async def get_user_by_id(self, user_id: int) -> Optional[User]:
         """

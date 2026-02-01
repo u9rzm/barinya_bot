@@ -49,6 +49,7 @@ async def auth(
         id=data_from_db.id,
         telegram_id=data_from_db.telegram_id,
         loyalty_points=data_from_db.loyalty_points,
+        wallet=data_from_db.wallet,
         total_spent=data_from_db.total_spent,
         loyalty_level_id=data_from_db.loyalty_level_id,
         referrer_id=data_from_db.referrer_id,
@@ -63,7 +64,6 @@ async def auth(
         "loyalty_points": session.loyalty_points,
         "loyalty_level_id": session.loyalty_level_id,
     }
-
 
 
 @router.get("/api/auth/check")

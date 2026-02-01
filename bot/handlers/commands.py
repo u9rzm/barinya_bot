@@ -116,9 +116,6 @@ async def start_command(message: Message) -> None:
                 # Create new user
                 new_user = await user_service.create_user(
                     telegram_id=user.id,
-                    username=user.username,
-                    first_name=user.first_name,
-                    last_name=user.last_name,
                     referrer_id=referrer_id
                 )
                 

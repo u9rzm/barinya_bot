@@ -1,0 +1,45 @@
+/* =========================
+   Fonts
+========================= */
+
+@font-face {
+    font-family: "Enthalpy298";
+    src: url("../fonts/Enthalpy298.ttf") format("truetype");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "FuturaNewCondBook";
+    src: url("../fonts/FuturaNewCondBook.ttf") format("truetype");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "TTHoves";
+    src: url("../fonts/TTHoves-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* =========================
+   Reset & Base
+========================= */
+:root {
+  --header-height: calc(var(--tg-safe-area-inset-top) + 120px);
+  --footer-height: var(--tg-safe-area-inset-bottom);
+  --tg-theme-button-text-color: #FAAC6E;
+
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "TTHoves", sans-serif;
+  line-height: 1.4;
+  background-color: var(--bg-color);
+}
+

@@ -14,6 +14,7 @@ class CacheUser(BaseModel):
     loyalty_points: float | None = 0
     total_spent: float | None = 0
     loyalty_level_id: int | None = 0
+    wallet: str | None = None
     referrer_id: int | None = None
     expires_at: datetime | None = None
 class CacheOrder(BaseModel):
