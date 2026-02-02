@@ -41,7 +41,11 @@ async def auth(
     )
 
     if not data_from_db:
-        raise HTTPException(404, "User not found")
+        await UserService(db).create_user(
+                    telegram_id=telegram_user["telegram_id"]
+                    )
+        await db.commit()
+        
 
 
 

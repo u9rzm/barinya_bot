@@ -1,14 +1,12 @@
 """Database configuration and session management."""
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-
 from shared.config import settings
 
 
 class Base(DeclarativeBase):
     """Base class for all database models."""
     pass
-
 
 # Create async engine
 engine = create_async_engine(
@@ -26,7 +24,6 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
-
 async def get_db() -> AsyncSession:
     """Dependency for getting database session."""
     async with AsyncSessionLocal() as session:
@@ -39,11 +36,9 @@ async def get_db() -> AsyncSession:
         finally:
             await session.close()
 
-
 def get_async_session():
     """Get async database session for direct use (not as dependency)."""
     return AsyncSessionLocal()
-
 
 async def init_db():
     """Initialize database tables."""

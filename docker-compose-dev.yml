@@ -105,8 +105,7 @@ services:
     container_name: telegram-bar-bot-dev
     environment:
       # Database
-      DATABASE_URL: postgresql+asyncpg://barbot:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
-      
+      DATABASE_URL: postgresql+asyncpg://barbot:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot      
       # Telegram Bot
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-}      
@@ -115,8 +114,7 @@ services:
       # Application
       APP_HOST: 0.0.0.0
       APP_PORT: 8001
-      DEBUG: ${DEBUG:-False}
-      
+      DEBUG: ${DEBUG:-False}      
       # JWT
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-secret}      
       # Google Sheets (optional)

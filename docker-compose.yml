@@ -6,13 +6,15 @@ services:
     image: postgres:15-alpine
     container_name: telegram-bar-bot-db
     environment:
-      POSTGRES_DB: telegram_bar_bot
-      POSTGRES_USER: barbot
+      POSTGRES_DB: ${POSTGRES_DB:-telegram_bar_bot}
+      POSTGRES_USER: ${POSTGRES_USER:-barbot}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-barbot_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
     # Убираем внешний порт - доступ только изнутри Docker сети
+    ports:
+      - "127.0.0.1:5432:5432"
     expose:
       - "5432"
     networks:
@@ -46,7 +48,7 @@ services:
     user: "1000:1000"
     environment:
       # Database
-      DATABASE_URL: postgresql+asyncpg://barbot:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-barbot}:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
       #redis
       REDIS_HOST: ${REDIS_HOST:-redis} 
       REDIS_PORT: ${REDIS_PORT:-6379} 
@@ -93,7 +95,8 @@ services:
     user: "1000:1000"
     environment:
       # Database
-      DATABASE_URL: postgresql+asyncpg://barbot:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-barbot}:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
+
     # Telegram Bot
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-}      
@@ -137,12 +140,10 @@ services:
       # target: production
     container_name: telegram-bar-bot-nginx
     volumes:
-      - menu_data:/var/www/app/data:ro
-      - /opt/ssl-backup/certs/workflow.chickenkiller.com:/etc/nginx/ssl:ro
+      - menu_data:/var/www/data:ro
       - logs_data:/var/log/nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "127.0.0.1:666:80"
     networks:
       - bar-bot-network
     depends_on:

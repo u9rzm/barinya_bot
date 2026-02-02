@@ -5,9 +5,7 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional
-
 from shared.config import settings
-
 
 class LoggerSetup:
     """Centralized logger setup and configuration."""
@@ -15,8 +13,7 @@ class LoggerSetup:
     def __init__(self):
         """Initialize logger setup."""
         self.log_dir = Path("logs")
-        self.log_dir.mkdir(exist_ok=True)
-        
+        self.log_dir.mkdir(exist_ok=True)        
         
         # Define log levels
         self.log_levels = {
@@ -31,6 +28,7 @@ class LoggerSetup:
         """Setup comprehensive logging configuration."""
         # Get log level from settings
         log_level = self.log_levels.get(settings.log_level.upper())
+        print(f"log_level: {log_level}")
         
         # Create formatters
         detailed_formatter = logging.Formatter(

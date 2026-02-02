@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.config import settings
 from shared.database import init_db, get_db
 from shared.redis import init_redis
-# from shared.services.menu_service import MenuService
 from shared.services.user_service import UserService
 from shared.logging_config import setup_logging, get_logger
 from shared.error_handlers import setup_error_handlers
@@ -50,19 +49,9 @@ app.include_router(referral.router)
 app.include_router(order.router)
 app.include_router(wallet.router)
 
-# Setup static files
-# app.mount("/static", StaticFiles(directory="webapp/static"), name="static")
-
 # Setup Jinja2 templates
 templates = Jinja2Templates(directory="webapp/templates")
 
-# @app.middleware("http")
-# async def no_cache_miniapp(request: Request, call_next):
-#     response = await call_next(request)
-#     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
-#     response.headers["Pragma"] = "no-cache"
-#     response.headers["Expires"] = "0"
-#     return response
 
 @app.on_event("startup")
 async def startup_event():
@@ -143,40 +132,6 @@ async def clear_cache(
     except Exception as e:
         logger.error(f"Error clearing cache: {e}", exc_info=True)
         return {"error": str(e), "status": "error"}
-
-
-@app.post("/api/sync-wallets")
-async def sync_wallets_manually(
-    request: Request,
-    telegram_user: dict = Depends(get_current_telegram_user)
-):
-    """Manually trigger wallet synchronization (admin only)."""
-    try:
-        logger.info(f"Manual wallet sync request from user: {telegram_user}")
-        
-        # Проверяем, что пользователь админ
-        user_id = telegram_user.get("id")
-        admin_ids = [int(id.strip()) for id in settings.admin_telegram_ids.split(",") if id.strip()]
-        
-        if user_id not in admin_ids:
-            logger.warning(f"Access denied for user {user_id} to sync wallets")
-            return {"error": "Access denied", "status": "error"}
-        
-        # Запускаем синхронизацию
-        result = await scheduler.run_wallet_sync_now()
-        
-        logger.info(f"Manual wallet sync completed by admin {user_id}")
-        
-        return {
-            "status": "success",
-            "message": "Wallet synchronization completed",
-            "result": result
-        }
-        
-    except Exception as e:
-        logger.error(f"Error in manual wallet sync: {e}", exc_info=True)
-        return {"error": str(e), "status": "error"}
-
 
 
 # # Template routes for Mini App pages

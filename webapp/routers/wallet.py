@@ -27,8 +27,7 @@ async def connect_wallet(
     
     # Валидация адреса кошелька (базовая проверка)
     if len(address) < 10:
-        raise HTTPException(400, "Invalid wallet address format")
-    
+        raise HTTPException(400, "Invalid wallet address format")    
     try:
         redis = get_redis()
         

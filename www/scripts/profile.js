@@ -26,7 +26,7 @@ async function auth(tg_init_data) {
 
   const stored = localStorage.getItem("access_token");
   if (stored) {
-    const check = await fetch("/api/auth/check", {
+    const check = await fetch("./api/auth/check", {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${stored}`,
@@ -44,7 +44,7 @@ async function auth(tg_init_data) {
     throw new Error("initData is empty");
   }
   console.log(tg_init_data);
-  const res = await fetch(`/api/auth?initData=${encodeURIComponent(tg_init_data)}`,
+  const res = await fetch(`./api/auth?initData=${encodeURIComponent(tg_init_data)}`,
    {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -271,7 +271,7 @@ export const ProfileMenu = {
 
     if (this.wallet) {
       const addr = this.wallet.account.address;
-      label.textContent = localStorage.getItem("loyalty_points") + ' ' + 'eBall ';
+      label.textContent = this.tg?.initDataUnsafe?.user?.first_name || 'Профиль';
       // label.textContent = shortenAddress(addr); // 0-4 + … + -4
     } else {
       label.textContent =
@@ -349,10 +349,9 @@ async handleWalletConnection(wallet) {
       console.warn('[WALLET] No access token found');
       return;
     }
-
     console.log('[WALLET] Sending connection request for address:', address);
     
-    const response = await fetch(`/api/wallet/connect?address=${encodeURIComponent(address)}`, {
+    const response = await fetch(`./api/wallet/connect?address=${encodeURIComponent(address)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -395,7 +394,7 @@ async handleWalletDisconnection(previousWallet) {
 
     console.log('[WALLET] Sending disconnection request for address:', address);
     
-    const response = await fetch(`/api/wallet/disconnect?`, {
+    const response = await fetch(`./api/wallet/disconnect?`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

@@ -4,7 +4,6 @@ from enum import Enum
 from typing import Optional
 from sqlalchemy import ForeignKey, String, Float, Integer, Boolean, DateTime, Text, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from shared.database import Base
 from pydantic import BaseModel
 
@@ -43,7 +42,6 @@ class User(Base):
         "PointsTransaction", 
         back_populates="user"
     )
-
 
 class LoyaltyLevel(Base):
     """Loyalty level model."""
