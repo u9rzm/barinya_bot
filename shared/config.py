@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     database_url: str
     
     # Admin
-    admin_telegram_ids: int | None = None
+    admin_telegram_ids: str | None = None
     reviews_channel_id: int | None = None
     
     # Application

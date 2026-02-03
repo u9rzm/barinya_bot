@@ -7,11 +7,15 @@ services:
     container_name: telegram-bar-bot-init
     volumes:
       - ./logs:/logs
+      - menu_data:/data
     command: |
       sh -c "
         mkdir -p /logs &&
         chown -R 1000:1000 /logs &&
-        chmod -R 755 /logs
+        chmod -R 755 /logs &&
+        mkdir -p /data &&
+        chown -R 1000:1000 /data &&
+        chmod -R 775 /data
       "
     restart: "no"
 
@@ -32,7 +36,7 @@ services:
     expose:
       - "5432"
     networks:
-      - bar-bot-network
+      - qnetwork
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U barbot -d telegram_bar_bot"]
@@ -51,8 +55,8 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
     networks:
-      - bar-bot-network  
-# Web Application
+      - qnetwork  
+ # Web Application
   webapp:
     build:
       context: .
@@ -87,7 +91,7 @@ services:
     expose:
       - "8000"
     networks:
-      - bar-bot-network
+      - qnetwork
     depends_on:
       init-logs:
         condition: service_completed_successfully
@@ -101,7 +105,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # Telegram Bot
+# Telegram Bot
   bot:
     build:
       context: .
@@ -135,7 +139,7 @@ services:
       - menu_data:/data
       - ./logs:/app/logs
     networks:
-      - bar-bot-network
+      - qnetwork
     depends_on:
       init-logs:
         condition: service_completed_successfully
@@ -160,10 +164,10 @@ services:
     volumes:
       - menu_data:/var/www/data:ro
       - ./logs:/var/log/nginx
-    ports:
-      - "127.0.0.1:666:80"
+    # ports:
+    #   - "127.0.0.1:666:80"
     networks:
-      - bar-bot-network
+      - qnetwork
     depends_on:
       - webapp
     restart: unless-stopped
@@ -178,9 +182,9 @@ volumes:
     
 
 networks:
-  bar-bot-network:
+  qnetwork:
     driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.25.0.0/16       # IPv4
+    # ipam:
+    #   driver: default
+    #   config:
+    #     - subnet: 172.25.0.0/16       # IPv4

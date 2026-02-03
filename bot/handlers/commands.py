@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.config import settings
 from shared.database import get_async_session
 from shared.services import UserService, ReferralService
+from shared.services.menu_service import MenuServiceGoogleTabs
 from shared.logging_config import get_logger, get_bot_logger, log_user_action, log_review_debug
 from bot.error_handlers import (
     bot_command_handler, 
@@ -24,6 +25,9 @@ from bot.states import ReviewStates
 
 logger = get_logger(__name__)
 bot_logger = get_bot_logger()
+
+admin_ids = [int(id.strip()) for id in settings.admin_telegram_ids.split(",") if id.strip()]
+bot_logger.info(f"Admin IDs: {admin_ids}")  
 
 def extract_referral_code(text: str) -> Optional[str]:
     """
@@ -68,8 +72,6 @@ async def start_command(message: Message) -> None:
     referral_code: Optional[str] = None
     if message.text:
         referral_code = extract_referral_code(message.text)
-    # if message.text and len(message.text.split()) > 1:
-    #     referral_code = message.text.split('=')[1]
     
     user = message.from_user
     if not user:
@@ -90,7 +92,7 @@ async def start_command(message: Message) -> None:
                     message,
                     f"👋 С возвращением, {user.first_name or user.username or 'друг'}!\n\n"
                     "Используйте меню ниже для навигации:",
-                    reply_markup=get_main_menu_keyboard()
+                    reply_markup=get_main_menu_keyboard(user.id)
                 )
             else:
                 # Register new user
@@ -142,7 +144,7 @@ async def start_command(message: Message) -> None:
                 await safe_send_message(
                     message,
                     welcome_text,
-                    reply_markup=get_main_menu_keyboard()
+                    reply_markup=get_main_menu_keyboard(user.id)
                 )
                 
                 log_user_action(
@@ -253,41 +255,6 @@ async def get_referral_link_callback(callback: CallbackQuery) -> None:
     except Exception as e:
         logger.error(f"Error in referral callback: {e}", exc_info=True)
         await callback.answer("❌ Произошла ошибка.")
-
-@callback_handler
-async def show_help_callback(message: Message) -> None:
-    """
-    Handle /help command.
-    
-    Args:
-        message: Incoming message with /help command
-    """
-    help_text = (
-        "🤖 <b>Команды бота:</b>\n\n"
-        "/start - Начать работу с ботом\n"
-        # "/menu - Открыть меню бара\n"
-        # "/profile - Открыть профиль\n"
-        # "/referral - Получить реферальную ссылку\n"
-        # "/help - Показать эту справку\n\n"
-        "📱 <b>Основные функции:</b>\n"
-        "• Просмотр меню бара\n"
-        "• Программа лояльности с баллами\n"
-        "• Реферальная система\n"
-        "• Уведомления о специальных предложениях\n\n"
-        "💡 Используйте кнопки меню для быстрого доступа к функциям!"
-    )
-    
-    await message.answer(help_text, reply_markup=get_main_menu_keyboard())
-
-# @callback_handler
-# async def show_menu_callback(callback: CallbackQuery) -> None:
-#     # Здесь должна быть логика открытия меню
-#     await menu_command(callback.message)  # или своя реализация
-
-# @callback_handler  
-# async def show_profile_callback(callback: CallbackQuery) -> None:
-#     # Здесь логика открытия профиля
-#     await profile_command(callback.message)
 
 
 @callback_handler
@@ -436,55 +403,111 @@ async def handle_review_message(message: Message, state: FSMContext, bot: Bot) -
         await safe_send_message(message, "❌ Произошла ошибка при отправке отзыва.")
         await state.clear()
 
-
-def get_main_menu_keyboard() -> InlineKeyboardMarkup:
+@bot_command_handler
+async def upload_menu_google_sheets_callback(callback: CallbackQuery) -> None:
     """
-    Create main menu inline keyboard.
+    Handle /upload_menu_google_sheets command - upload menu from Google Sheets.
     
-    Returns:
-        InlineKeyboardMarkup with main menu buttons
+    Args:
+        message: Incoming message with /upload_menu_google_sheets command
     """
-    menu_url = settings.webapp_url
+    user = callback.from_user
+    if not user or user.id not in admin_ids:
+        await safe_answer_callback(callback, "❌ У вас нет прав для выполнения этой команды.")
+        return
+    
+    try:
+        menu_service = MenuServiceGoogleTabs()
+        menu_service.generate_menu_json()
+        
+        await safe_answer_callback(
+            callback,
+            "✅ Меню успешно загружено из Google Sheets и обновлено."
+        )
+        bot_logger.info(f"Menu updated from Google Sheets by admin {user.id}")
+        
+    except Exception as e:
+        logger.error(f"Error uploading menu from Google Sheets: {e}", exc_info=True)
+        await safe_answer_callback(callback, "❌ Произошла ошибка при загрузке меню.")
+
+@callback_handler
+async def settings_callback(callback: CallbackQuery) -> None:
+    """
+    Handle settings callback - show settings menu.
+    
+    Args: MenuServiceGoogleTabs().generate_menu_json()
+        callback: Callback query from inline button
+    """
+    # Here should be the logic to show settings
+    # For now, just return to main menu
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="📱 Открыть меню",
-                    web_app=WebAppInfo(url=menu_url)
+                    text="Загрузить меню из Google Sheets",
+                    callback_data="upload_menu_google_sheets"
                 )
-            ],
-            # [ #Пока не нужно 
-            #     InlineKeyboardButton(
-            #         text="👤 Профиль",
-            #         callback_data="show_profile"
-            #     )
-            # ],
-            [
-                InlineKeyboardButton(
-                    text="👥 Реферальная ссылка",
-                    callback_data="get_referral_link"
-                )
-             ] #,  #Работает просто включи
-            
-            # [
-            #     InlineKeyboardButton(
-            #         text="✍️ Оставить отзыв",
-            #         callback_data="start_review"
-            #     )
-            # ]
+            ]
         ]
+    )
+    await callback.message.answer(
+        "⚙️ <b>Настройки</b>\n\n"
+        "Выберите действие:",
+        reply_markup=keyboard
+    )
+    await callback.answer()
+
+def get_main_menu_keyboard(id: int) -> InlineKeyboardMarkup:
+    """
+    Create main menu inline keyboard.    
+    Returns:
+        InlineKeyboardMarkup with main menu buttons
+    """
+    menu_url = settings.webapp_url
+    main_buttons = [ 
+        [
+            InlineKeyboardButton(
+                text="📱 Открыть меню",
+                web_app=WebAppInfo(url=menu_url)
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="👥 Реферальная ссылка",
+                callback_data="get_referral_link"
+            )
+            ] #,  #Работает просто включи            
+        # [
+        #     InlineKeyboardButton(
+        #         text="✍️ Оставить отзыв",
+        #         callback_data="start_review"
+        #     )
+        # ]
+    ]
+    
+    if id in admin_ids:
+        main_buttons.append([
+            InlineKeyboardButton(
+                text="👤 Настройки",
+                callback_data="settings"
+            )]
+        )
+    
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=main_buttons
     )
     
     return keyboard
 
 def register_command_handlers(dp: Dispatcher) -> None:
     """Register command handlers."""
-    dp.message.register(start_command, CommandStart())
-    
+    dp.message.register(start_command, CommandStart())    
     # Review message handler (must be registered with state filter)
     dp.message.register(handle_review_message, ReviewStates.waiting_for_review)
     
     # Callback handlers
+    dp.callback_query.register(settings_callback, F.data == "settings")
+    dp.callback_query.register(upload_menu_google_sheets_callback, F.data == "upload_menu_google_sheets")
     dp.callback_query.register(get_referral_link_callback, F.data == "get_referral_link")
     dp.callback_query.register(start_review_callback, F.data == "start_review")
     dp.callback_query.register(cancel_review_callback, F.data == "cancel_review")

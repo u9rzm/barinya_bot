@@ -133,7 +133,6 @@ async def clear_cache(
         logger.error(f"Error clearing cache: {e}", exc_info=True)
         return {"error": str(e), "status": "error"}
 
-
 # # Template routes for Mini App pages
 # @app.get("/app")
 # async def app_entry(request: Request):
