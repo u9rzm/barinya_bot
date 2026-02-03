@@ -1,6 +1,20 @@
 
 services:
 #Infrastructure
+  # Init container to set up log permissions
+  init-logs:
+    image: alpine:latest
+    container_name: telegram-bar-bot-init
+    volumes:
+      - ./logs:/logs
+    command: |
+      sh -c "
+        mkdir -p /logs &&
+        chown -R 1000:1000 /logs &&
+        chmod -R 755 /logs
+      "
+    restart: "no"
+
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
@@ -48,7 +62,7 @@ services:
     user: "1000:1000"
     environment:
       # Database
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-barbot}:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-barbot}:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/${POSTGRES_DB:-telegram_bar_bot}
       #redis
       REDIS_HOST: ${REDIS_HOST:-redis} 
       REDIS_PORT: ${REDIS_PORT:-6379} 
@@ -64,18 +78,19 @@ services:
       # Google Sheets (optional)
       GOOGLE_SHEETS_CREDENTIALS_FILE: ${GOOGLE_SHEETS_CREDENTIALS_FILE:-}
       GOOGLE_SHEETS_SPREADSHEET_ID: ${GOOGLE_SHEETS_SPREADSHEET_ID:-}
-      GOOGLE_SHEETS_RANGE: ${GOOGLE_SHEETS_RANGE:-Menu!A2:F}
-      
+      GOOGLE_SHEETS_RANGE: ${GOOGLE_SHEETS_RANGE:-Menu!A2:F}      
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-secret}
       # Logging
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-    # volumes:
-    #   - logs_data:/app/logs
+      LOG_LEVEL: ${LOG_LEVEL:-ERROR}
+    volumes:
+      - ./logs:/app/logs:rw
     expose:
       - "8000"
     networks:
       - bar-bot-network
     depends_on:
+      init-logs:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     restart: unless-stopped
@@ -95,18 +110,19 @@ services:
     user: "1000:1000"
     environment:
       # Database
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-barbot}:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/telegram_bar_bot
-
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-barbot}:${POSTGRES_PASSWORD:-barbot_password}@postgres:5432/${POSTGRES_DB:-telegram_bar_bot}
     # Telegram Bot
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-}      
+      TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-} 
+      BOT_NAME: ${BOT_NAME:-} 
+      WEBAPP_URL: ${WEBAPP_URL:-} 
+      REVIEWS_CHANNEL_ID: ${REVIEWS_CHANNEL_ID:-}   
       # Admin
       ADMIN_TELEGRAM_IDS: ${ADMIN_TELEGRAM_IDS}      
       # Application
       APP_HOST: 0.0.0.0
       APP_PORT: 8001
-      DEBUG: ${DEBUG:-False}
-      
+      DEBUG: ${DEBUG:-False}      
       # JWT
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-secret}      
       # Google Sheets (optional)
@@ -114,13 +130,15 @@ services:
       GOOGLE_SHEETS_SPREADSHEET_ID: ${GOOGLE_SHEETS_SPREADSHEET_ID:-}
       GOOGLE_SHEETS_RANGE: ${GOOGLE_SHEETS_RANGE:-Menu!A2:F}      
       # Logging
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_LEVEL: ${LOG_LEVEL:-ERROR}
     volumes:
       - menu_data:/data
-      # - logs_data:/app/logs
+      - ./logs:/app/logs
     networks:
       - bar-bot-network
     depends_on:
+      init-logs:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     restart: unless-stopped
@@ -141,7 +159,7 @@ services:
     container_name: telegram-bar-bot-nginx
     volumes:
       - menu_data:/var/www/data:ro
-      - logs_data:/var/log/nginx
+      - ./logs:/var/log/nginx
     ports:
       - "127.0.0.1:666:80"
     networks:

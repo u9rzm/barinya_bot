@@ -35,8 +35,8 @@ RUN mkdir -p /app/logs && \
     chown -R appuser:appgroup /app/logs && \
     chown -R appuser:appgroup /data && \
     chown -R appuser:appgroup /app && \
-    chmod 755 /app/logs && \
-    chmod 755 /data
+    chmod -R 755 /app/logs && \
+    chmod -R 755 /data
 
 # Switch to non-root user
 USER appuser

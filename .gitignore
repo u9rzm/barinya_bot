@@ -46,6 +46,7 @@ ENV/
 # Logs
 *.log
 logs/
+!logs/README.md
 
 # Testing
 .pytest_cache/

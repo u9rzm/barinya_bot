@@ -1,4 +1,5 @@
 """Configuration management using pydantic-settings."""
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,13 +16,16 @@ class Settings(BaseSettings):
     # Telegram Bot
     telegram_bot_token: str
     telegram_webhook_url: str | None = None
+    bot_name: str = "BarinyaBot"
+    webapp_url: str = "https://barinia.sweethome38.keenetic.pro/"
 
     
     # Database
     database_url: str
     
     # Admin
-    admin_telegram_ids: str = ""
+    admin_telegram_ids: int | None = None
+    reviews_channel_id: int | None = None
     
     # Application
     app_host: str = "0.0.0.0"

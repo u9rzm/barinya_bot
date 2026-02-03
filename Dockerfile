@@ -55,7 +55,7 @@ COPY ./secret/credentials.json /app/credentials.json
 # Create logs directory and set permissions App
 RUN mkdir -p /app/logs && \
     chown -R appuser:appgroup /app && \
-    chmod 755 /app/logs
+    chmod -R 755 /app/logs
 
 # Switch to non-root user
 USER appuser

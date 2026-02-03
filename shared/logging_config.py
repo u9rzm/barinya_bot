@@ -137,10 +137,10 @@ class LoggerSetup:
             backupCount=10,
             encoding='utf-8'
         )
-        bot_handler.setLevel(logging.INFO)
+        bot_handler.setLevel(logging.DEBUG)  # Temporarily set to DEBUG for diagnostics
         bot_handler.setFormatter(formatter)
         bot_logger.addHandler(bot_handler)
-        bot_logger.setLevel(logging.INFO)
+        bot_logger.setLevel(logging.DEBUG)  # Temporarily set to DEBUG for diagnostics
         bot_logger.propagate = False
         
         # Notification logger
@@ -289,33 +289,28 @@ def log_admin_action(
     admin_logger.info(f"ADMIN_ACTION: {log_message}")
 
 
-def log_security_event(
-    event_type: str,
-    telegram_id: Optional[int] = None,
-    ip_address: Optional[str] = None,
+def log_user_action(
+    user_id: int,
+    action: str,
     details: Optional[str] = None,
     **kwargs
 ) -> None:
     """
-    Log a security event.
+    Log a user action with structured data.
     
     Args:
-        event_type: Type of security event (auth_failure, invalid_token, etc.)
-        telegram_id: Telegram ID if applicable
-        ip_address: IP address if applicable
-        details: Additional details
+        user_id: Telegram ID of the user
+        action: Action performed (review_submitted, order_placed, etc.)
+        details: Additional details about the action
         **kwargs: Additional metadata
     """
-    security_logger = get_security_logger()
+    bot_logger = get_bot_logger()
     
     log_data = {
-        "event_type": event_type,
+        "user_id": user_id,
+        "action": action,
     }
     
-    if telegram_id:
-        log_data["telegram_id"] = telegram_id
-    if ip_address:
-        log_data["ip_address"] = ip_address
     if details:
         log_data["details"] = details
     
@@ -324,4 +319,37 @@ def log_security_event(
     
     # Create structured log message
     log_message = " | ".join([f"{k}={v}" for k, v in log_data.items()])
-    security_logger.warning(f"SECURITY_EVENT: {log_message}")
+    bot_logger.info(f"USER_ACTION: {log_message}")
+
+
+def log_review_debug(
+    user_id: int,
+    step: str,
+    details: Optional[str] = None,
+    **kwargs
+) -> None:
+    """
+    Log review processing debug information.
+    
+    Args:
+        user_id: Telegram ID of the user
+        step: Current step in review processing
+        details: Additional details
+        **kwargs: Additional metadata
+    """
+    bot_logger = get_bot_logger()
+    
+    log_data = {
+        "user_id": user_id,
+        "step": step,
+    }
+    
+    if details:
+        log_data["details"] = details
+    
+    # Add any additional metadata
+    log_data.update(kwargs)
+    
+    # Create structured log message
+    log_message = " | ".join([f"{k}={v}" for k, v in log_data.items()])
+    bot_logger.debug(f"REVIEW_DEBUG: {log_message}")
