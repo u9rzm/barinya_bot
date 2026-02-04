@@ -47,6 +47,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: telegram-bar-bot-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-barbot_password}
     environment:
       REDIS_PORT: ${REDIS_PORT:-6379} 
       REDIS_PASSWORD: ${REDIS_PASSWORD:-barbot_password}  
@@ -135,6 +136,9 @@ services:
       GOOGLE_SHEETS_RANGE: ${GOOGLE_SHEETS_RANGE:-Menu!A2:F}      
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-ERROR}
+      REDIS_HOST: ${REDIS_HOST:-redis} 
+      REDIS_PORT: ${REDIS_PORT:-6379} 
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-barbot_password}
     volumes:
       - menu_data:/data
       - ./logs:/app/logs
@@ -164,8 +168,8 @@ services:
     volumes:
       - menu_data:/var/www/data:ro
       - ./logs:/var/log/nginx
-    # ports:
-    #   - "127.0.0.1:666:80"
+    ports:
+      - "${ENTRY_POINT}:80"
     networks:
       - qnetwork
     depends_on:

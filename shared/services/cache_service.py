@@ -1,7 +1,7 @@
 from shared.redis import get_redis
 from shared.config import settings
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Dict, Any
 from pydantic import BaseModel
 import json
 import secrets
@@ -20,6 +20,13 @@ class CacheUser(BaseModel):
 class CacheOrder(BaseModel):
     """Redis Order Model"""
     pass
+
+
+class CacheStatistics(BaseModel):
+    """Cached statistics model"""
+    data: Dict[str, Any]
+    cached_at: datetime
+    expires_at: datetime
 
 
 ttl = settings.session_ttl
@@ -65,3 +72,103 @@ async def get_session(token: str) -> dict | None:
 
 async def revoke_session(token: str):
     await get_redis().delete(f"session:{token}")
+
+
+# Statistics caching
+STATISTICS_PREFIX = 'statistics'
+STATISTICS_TTL = 30 * 60  # 30 minutes
+
+
+async def cache_statistics(stats_type: str, data: Dict[str, Any]) -> None:
+    """Cache statistics data with TTL."""
+    try:
+        now = datetime.utcnow()
+        expires_at = now + timedelta(seconds=STATISTICS_TTL)
+        
+        cache_data = CacheStatistics(
+            data=data,
+            cached_at=now,
+            expires_at=expires_at
+        )
+        
+        await get_redis().set(
+            f"{STATISTICS_PREFIX}:{stats_type}",
+            cache_data.model_dump_json(),
+            ex=STATISTICS_TTL,
+        )
+    except Exception:
+        # Silently fail if Redis is not available
+        pass
+
+
+async def get_cached_statistics(stats_type: str) -> Optional[Dict[str, Any]]:
+    """Get cached statistics data."""
+    try:
+        redis = get_redis()
+        key = f"{STATISTICS_PREFIX}:{stats_type}"
+        
+        raw = await redis.get(key)
+        if not raw:
+            return None
+        
+        try:
+            cached_stats = CacheStatistics.model_validate_json(raw)
+            
+            # Check if expired
+            if cached_stats.expires_at < datetime.utcnow():
+                await redis.delete(key)
+                return None
+            
+            return cached_stats.data
+        except Exception:
+            # If parsing fails, delete the key
+            await redis.delete(key)
+            return None
+    except Exception:
+        # Return None if Redis is not available
+        return None
+
+
+async def invalidate_statistics_cache(stats_type: Optional[str] = None) -> None:
+    """Invalidate statistics cache."""
+    try:
+        redis = get_redis()
+        
+        if stats_type:
+            # Invalidate specific type
+            await redis.delete(f"{STATISTICS_PREFIX}:{stats_type}")
+        else:
+            # Invalidate all statistics
+            keys = await redis.keys(f"{STATISTICS_PREFIX}:*")
+            if keys:
+                await redis.delete(*keys)
+    except Exception:
+        # Silently fail if Redis is not available
+        pass
+
+
+async def get_statistics_cache_info() -> Dict[str, Any]:
+    """Get information about cached statistics."""
+    try:
+        redis = get_redis()
+        keys = await redis.keys(f"{STATISTICS_PREFIX}:*")
+        
+        cache_info = {}
+        for key in keys:
+            raw = await redis.get(key)
+            if raw:
+                try:
+                    cached_stats = CacheStatistics.model_validate_json(raw)
+                    stats_type = key.split(":")[-1]
+                    cache_info[stats_type] = {
+                        "cached_at": cached_stats.cached_at.isoformat(),
+                        "expires_at": cached_stats.expires_at.isoformat(),
+                        "ttl": await redis.ttl(key)
+                    }
+                except Exception:
+                    continue
+        
+        return cache_info
+    except Exception:
+        # Return empty dict if Redis is not available
+        return {}

@@ -238,3 +238,79 @@ class LoyaltyService:
             select(LoyaltyLevel).where(LoyaltyLevel.id == level_id)
         )
         return result.scalar_one_or_none()
+    
+    async def update_level(
+        self,
+        level_id: int,
+        name: Optional[str] = None,
+        threshold: Optional[float] = None,
+        points_rate: Optional[float] = None,
+    ) -> Optional[LoyaltyLevel]:
+        """
+        Update an existing loyalty level.
+        
+        Args:
+            level_id: Level ID to update
+            name: New level name (optional)
+            threshold: New threshold (optional)
+            points_rate: New points rate (optional)
+            
+        Returns:
+            Updated LoyaltyLevel object or None if not found
+        """
+        level = await self.get_level_by_id(level_id)
+        if not level:
+            return None
+        
+        if name is not None:
+            level.name = name
+        if threshold is not None:
+            level.threshold = threshold
+        if points_rate is not None:
+            level.points_rate = points_rate
+        
+        await self.db.flush()
+        await self.db.refresh(level)
+        
+        return level
+    
+    async def delete_level(self, level_id: int) -> bool:
+        """
+        Delete a loyalty level.
+        Note: This will fail if there are users assigned to this level.
+        
+        Args:
+            level_id: Level ID to delete
+            
+        Returns:
+            True if deleted successfully, False if not found or has users
+        """
+        level = await self.get_level_by_id(level_id)
+        if not level:
+            return False
+        
+        # Check if any users are assigned to this level
+        result = await self.db.execute(
+            select(User).where(User.loyalty_level_id == level_id).limit(1)
+        )
+        if result.scalar_one_or_none():
+            return False  # Cannot delete level with assigned users
+        
+        await self.db.delete(level)
+        await self.db.flush()
+        
+        return True
+    
+    async def reorder_levels(self, level_orders: dict[int, int]) -> None:
+        """
+        Reorder loyalty levels.
+        
+        Args:
+            level_orders: Dictionary mapping level_id to new order number
+        """
+        for level_id, new_order in level_orders.items():
+            level = await self.get_level_by_id(level_id)
+            if level:
+                level.order = new_order
+        
+        await self.db.flush()

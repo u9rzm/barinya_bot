@@ -15,8 +15,10 @@ from aiohttp.web_app import Application
 
 from shared.config import settings
 from shared.database import get_async_session
+from shared.redis import init_redis, close_redis
 from shared.logging_config import setup_logging, get_logger
 from shared.services.menu_service import MenuServiceGoogleTabs
+from shared.services.statistics_scheduler import start_statistics_scheduler, stop_statistics_scheduler
 from bot.handlers import register_handlers
 from bot.middleware import LoggingMiddleware
 
@@ -35,6 +37,22 @@ dp = Dispatcher(storage=MemoryStorage())
 async def on_startup() -> None:
     """Bot startup handler."""
     logger.info("Bot starting up...")
+    
+    # Initialize Redis
+    try:
+        await init_redis()
+        logger.info("Redis initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize Redis: {e}")
+        # Continue without Redis - statistics will work without cache
+    
+    # Start statistics scheduler
+    try:
+        await start_statistics_scheduler(refresh_interval_minutes=30)
+        logger.info("Statistics scheduler started")
+    except Exception as e:
+        logger.error(f"Failed to start statistics scheduler: {e}")
+        # Continue without scheduler - statistics will work without cache
     
     # Register middleware
     dp.message.middleware(LoggingMiddleware())
@@ -65,6 +83,21 @@ async def on_startup() -> None:
 async def on_shutdown() -> None:
     """Bot shutdown handler."""
     logger.info("Bot shutting down...")
+    
+    # Stop statistics scheduler
+    try:
+        await stop_statistics_scheduler()
+        logger.info("Statistics scheduler stopped")
+    except Exception as e:
+        logger.error(f"Error stopping statistics scheduler: {e}")
+    
+    # Close Redis connection
+    try:
+        await close_redis()
+        logger.info("Redis connection closed")
+    except Exception as e:
+        logger.error(f"Error closing Redis: {e}")
+    
     await bot.session.close()
 
 

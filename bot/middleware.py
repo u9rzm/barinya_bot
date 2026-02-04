@@ -37,8 +37,7 @@ class LoggingMiddleware(BaseMiddleware):
         
         try:
             # Call the handler
-            result = await handler(event, data)
-            
+            result = await handler(event, data)            
             # Log successful processing
             if isinstance(event, Message):
                 bot_logger.debug(f"Successfully processed message from {user_id}")
