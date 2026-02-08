@@ -26,7 +26,7 @@ async function auth(tg_init_data) {
 
   const stored = localStorage.getItem("access_token");
   if (stored) {
-    const check = await fetch("./api/auth/check", {
+    const check = await fetch("./api/auth/user/check", {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${stored}`,
@@ -44,21 +44,22 @@ async function auth(tg_init_data) {
     throw new Error("initData is empty");
   }
   console.log(tg_init_data);
-  const res = await fetch(`./api/auth?initData=${encodeURIComponent(tg_init_data)}`,
+  const res = await fetch(`./api/auth/user`,
    {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Authorization": `TMA ${tg_init_data}` },
     cache: "no-store"
   });
 
   if (!res.ok) {
     throw new Error("Auth failed");
   }
+  console.log(res);
 
-  const data = await res.json();
-  localStorage.setItem("access_token", data.access_token);
-  localStorage.setItem("loyalty_points", data.loyalty_points);
-  localStorage.setItem("loyalty_level_id", data.loyalty_level_id);
+  const data = res.ok ? await res.json() : null;
+  localStorage.setItem("access_token", data.user.access_token);
+  localStorage.setItem("loyalty_points", data.user.loyalty_points);
+  localStorage.setItem("loyalty_level_id", data.user.loyalty_level_id);
   return data.access_token;
 }
 

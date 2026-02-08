@@ -20,14 +20,16 @@ class CacheUser(BaseModel):
 class CacheOrder(BaseModel):
     """Redis Order Model"""
     pass
-
-
 class CacheStatistics(BaseModel):
     """Cached statistics model"""
     data: Dict[str, Any]
     cached_at: datetime
     expires_at: datetime
+class CacheIikoFront(BaseModel):
+    """Redis IikoFront Model"""
+    id: int
 
+    expires_at: datetime | None = None
 
 ttl = settings.session_ttl
 session_ttl = settings.session_max_lifetime

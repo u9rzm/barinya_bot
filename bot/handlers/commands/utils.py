@@ -54,13 +54,13 @@ def get_main_menu_keyboard(user_id: int = None) -> InlineKeyboardMarkup:
                 text="👥 Реферальная ссылка",
                 callback_data="get_referral_link"
             )
-        ] #,  #Работает просто включи            
-        # [
-        #     InlineKeyboardButton(
-        #         text="✍️ Оставить отзыв",
-        #         callback_data="start_review"
-        #     )
-        # ]
+        ],              
+        [
+            InlineKeyboardButton(
+                text="✍️ Оставить отзыв",
+                callback_data="start_review"
+            )
+        ]
     ]
     
     if user_id and user_id in admin_ids:

@@ -18,7 +18,7 @@ from shared.services.scheduler_service import scheduler
 from webapp.middleware.auth import AuthMiddleware, get_current_telegram_user
 from webapp.routers import auth
 
-from webapp.routers import user, loyalty, referral, order, wallet
+from webapp.routers import loyalty, referral, order, wallet
 
 from typing import Optional
 from fastapi import HTTPException
@@ -42,7 +42,7 @@ app.add_middleware(AuthMiddleware)
 
 # Include API routers
 app.include_router(auth.router)
-app.include_router(user.router)
+
 app.include_router(loyalty.router)
 app.include_router(referral.router)
 # app.include_router(menu.router)

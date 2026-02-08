@@ -42,6 +42,7 @@ class Settings(BaseSettings):
 
     #JWT
     jwt_secret_key: str
+    iiko_front_token: str = ""  # Токен для доступа к iikoFront API
     
     #Redis 
     session_ttl: int = 7200
