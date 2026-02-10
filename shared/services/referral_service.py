@@ -70,7 +70,7 @@ class ReferralService:
         # Format: https://t.me/bot_username?start=REFERRAL_CODE
         # For now, we'll use a generic format since we don't have bot username
         # In production, this should be configured or fetched from Telegram API
-        return f"https://t.me/BarinyaBot?start={referral_code}"
+        return f"https://t.me/{settings.bot_name}?start={referral_code}"
     
     async def register_referral(
         self,
