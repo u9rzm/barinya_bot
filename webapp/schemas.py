@@ -1,9 +1,7 @@
 """Pydantic schemas for API responses."""
 from datetime import datetime
 from typing import Optional
-
 from pydantic import BaseModel
-
 
 class LoyaltyLevelResponse(BaseModel):
     """Loyalty level response schema."""
@@ -15,7 +13,6 @@ class LoyaltyLevelResponse(BaseModel):
     
     class Config:
         from_attributes = True
-
 
 class UserProfileResponse(BaseModel):
     """User profile response schema."""
@@ -33,7 +30,6 @@ class UserProfileResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
 class UserStatsResponse(BaseModel):
     """User statistics response schema."""
     loyalty_points: float
@@ -43,7 +39,6 @@ class UserStatsResponse(BaseModel):
     created_at: datetime
     next_level: Optional[LoyaltyLevelResponse] = None
     progress_to_next_level: Optional[float] = None
-
 
 class PointsTransactionResponse(BaseModel):
     """Points transaction response schema."""
@@ -56,19 +51,16 @@ class PointsTransactionResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
 class ReferralInfoResponse(BaseModel):
     """Referral info response schema."""
     user: UserProfileResponse
     earned_from_user: float
-
 
 class ReferralStatsResponse(BaseModel):
     """Referral statistics response schema."""
     total_referrals: int
     total_earned: float
     referrals: list[ReferralInfoResponse]
-
 
 class MenuCategoryResponse(BaseModel):
     """Menu category response schema."""
@@ -78,7 +70,6 @@ class MenuCategoryResponse(BaseModel):
     
     class Config:
         from_attributes = True
-
 
 class MenuItemResponse(BaseModel):
     """Menu item response schema."""
@@ -95,7 +86,6 @@ class MenuItemResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
 class MenuCategoryWithItemsResponse(BaseModel):
     """Menu category with items response schema."""
     id: int
@@ -105,7 +95,6 @@ class MenuCategoryWithItemsResponse(BaseModel):
     
     class Config:
         from_attributes = True
-
 
 class OrderItemResponse(BaseModel):
     """Order item response schema."""
@@ -117,7 +106,6 @@ class OrderItemResponse(BaseModel):
     
     class Config:
         from_attributes = True
-
 
 class OrderResponse(BaseModel):
     """Order response schema."""
@@ -131,8 +119,6 @@ class OrderResponse(BaseModel):
     
     class Config:
         from_attributes = True
-
-
 
 class OrderCreateRequest(BaseModel):
     """Order creation request schema."""

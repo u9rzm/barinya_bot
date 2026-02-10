@@ -24,6 +24,7 @@
   justify-content: center;
   border-radius: 50%;
   gap: 1px; 
+  
 }
 
 /* ===== CATEGORY BUTTON ===== */
@@ -33,7 +34,8 @@
   margin: 7px;
   width: 50px;
   height: 50px;
-
+  background: #00535eab;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +49,7 @@
   -webkit-tap-highlight-color: transparent; /* mobile */
   transition:
     transform 0.35s ease,
-    opacity 0.35s ease,
+    opacity 0.75s ease,
     background-color 0.2s ease;
 }
 
@@ -89,8 +91,8 @@
 /* ===== ICON (MASK) ===== */
 
 .icon-mask {
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
 
   background-color: #FAAC6E;
   -webkit-mask: var(--icon-mask) no-repeat center / contain;

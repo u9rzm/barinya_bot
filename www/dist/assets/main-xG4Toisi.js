@@ -28,7 +28,7 @@
       `)},injectStyles(){const e=document.createElement("style");e.textContent=`
       .pm-container {
         position: fixed;
-        top: calc(var(--tg-safe-area-inset-top) + 60px);
+        top: calc(var(--tg-safe-area-inset-top, 60px) + 60px);
         right: 16px;
         z-index: 2147483647;
         display: flex;
@@ -38,8 +38,8 @@
       }
 
       .pm-btn {
-        height: 36px;
-        border-radius: 24px;
+        height: 40px;
+        border-radius: 50%;
         background: #00535E;
         border: 1px;
         border-color: #FAAC6E;
@@ -69,8 +69,8 @@
       }
 
       .pm-avatar {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
       }
 
@@ -92,8 +92,8 @@
       }
 
       .pm-item {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         background: #2c2c2ea5;
         display: flex;
@@ -105,7 +105,7 @@
       .pm-modal {
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,.6);
+        background: #00535e95;
         display: flex;
         align-items: center;
         justify-content: center;

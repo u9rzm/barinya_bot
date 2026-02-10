@@ -26,8 +26,8 @@
    Reset & Base
 ========================= */
 :root {
-  --header-height: calc(var(--tg-safe-area-inset-top) + 120px);
-  --footer-height: var(--tg-safe-area-inset-bottom);
+  --header-height: calc(var(--tg-safe-area-inset-top, 40px) + 120px);
+  --footer-height: var(--tg-safe-area-inset-bottom, 40px);
   --tg-theme-button-text-color: #FAAC6E;
 
 }
