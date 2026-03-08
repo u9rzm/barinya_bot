@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { CartItem, Product, User } from '../constants/types';
 import { cn } from '../utils/cn';
 import { validators, validationMessages } from '../utils/validation';
 import { logger } from '../utils/logger';
+import { debounce } from '../utils/debounce';
 
 interface CheckoutSheetProps {
   isOpen: boolean;
@@ -60,26 +61,36 @@ export function CheckoutSheet({ isOpen, onClose, cart, onUpdateCart, theme, user
     }
   }, [isOpen, user?.preferredPaymentMethod]);
 
-  // Validate form fields
-  useEffect(() => {
+  // Validate form fields with debounce
+  const validateForm = useCallback(() => {
     const errors = {
       name: validators.name(customerName) ? null : validationMessages.name,
       phone: validators.phone(customerPhone) ? null : validationMessages.phone,
       address: validators.address(customerAddress) ? null : validationMessages.address,
     };
-    
+
     // Don't show errors until user has typed something
     if (!customerName) errors.name = null;
     if (!customerPhone) errors.phone = null;
     if (!customerAddress) errors.address = null;
-    
+
     setFormErrors(errors);
-    
-    const isValid = validators.name(customerName) && 
-                    validators.phone(customerPhone) && 
+
+    const isValid = validators.name(customerName) &&
+                    validators.phone(customerPhone) &&
                     validators.address(customerAddress);
     setIsFormValid(isValid);
   }, [customerName, customerPhone, customerAddress]);
+
+  // Debounced validation - updates 300ms after user stops typing
+  const debouncedValidate = useMemo(() => 
+    debounce(validateForm, 300),
+    [validateForm]
+  );
+
+  useEffect(() => {
+    debouncedValidate();
+  }, [customerName, customerPhone, customerAddress, debouncedValidate]);
 
   const paymentMethods = useMemo(() => [
     { id: 'card', name: 'Картой', icon: '💳' },

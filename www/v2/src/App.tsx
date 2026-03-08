@@ -16,6 +16,7 @@ import { logger } from './utils/logger';
 import { useAuth, useAuthStatus, TelegramUser, formatUserName, AuthErrorDisplay, useAuthError } from './auth';
 import { UserProfileMenu } from './components/UserProfileMenu';
 import { AuthDebug } from './components/AuthDebug';
+import { debounce } from './utils/debounce';
 
 // Адаптер: преобразует TelegramUser в User формат приложения
 function adaptTelegramUserToAppUser(telegramUser: TelegramUser | null): User | null {
@@ -113,6 +114,15 @@ export default function App() {
   // Загрузка данных из JSON
   useEffect(() => {
     const abortController = new AbortController();
+    let pollingTimeout: ReturnType<typeof setTimeout> | null = null;
+    
+    // Debounced polling с экспоненциальной задержкой при ошибках
+    const schedulePoll = (delay: number) => {
+      if (pollingTimeout) clearTimeout(pollingTimeout);
+      pollingTimeout = setTimeout(() => {
+        fetchData(3); // Сбрасываем retries при плановом polling
+      }, delay);
+    };
     
     const fetchData = async (retries = 3) => {
       try {
@@ -170,8 +180,10 @@ export default function App() {
         
         logger.error('Failed to fetch data', err);
         if (retries > 0) {
-          logger.info(`Retrying fetch... (${retries} attempts left)`);
-          setTimeout(() => fetchData(retries - 1), 2000);
+          // Экспоненциальная задержка при ошибках: 2s, 4s, 8s
+          const delay = (4 - retries) * 2000;
+          logger.info(`Retrying fetch in ${delay}ms... (${retries} attempts left)`);
+          schedulePoll(delay);
         } else {
           setError('Не удалось загрузить данные меню. Пожалуйста, проверьте интернет-соединение.');
           setIsLoading(false);
@@ -181,12 +193,12 @@ export default function App() {
     // Начальная загрузка
     fetchData();
 
-    // Настройка периодического обновления (например, каждые 60 секунд)
+    // Настройка периодического обновления с debounce (каждые 60 секунд)
     const POLLING_INTERVAL = 60000;
-    const intervalId = setInterval(fetchData, POLLING_INTERVAL);
+    schedulePoll(POLLING_INTERVAL);
 
     return () => {
-      clearInterval(intervalId);
+      if (pollingTimeout) clearTimeout(pollingTimeout);
       abortController.abort(); // Отменяем все активные запросы при размонтировании
     };
   }, []);
