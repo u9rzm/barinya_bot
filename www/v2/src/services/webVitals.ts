@@ -3,7 +3,7 @@
  * 
  * Отслеживает ключевые метрики производительности:
  * - LCP (Largest Contentful Paint) - время рендера крупнейшего контента
- * - FID (First Input Delay) - задержка первого ввода
+ * - INP (Interaction to Next Paint) - задержка взаимодействия (замена FID)
  * - CLS (Cumulative Layout Shift) - кумулятивное смещение макета
  * - FCP (First Contentful Paint) - время первого рендера
  * - TTFB (Time To First Byte) - время до первого байта
@@ -11,7 +11,7 @@
  * @see https://web.dev/vitals/
  */
 
-import { onLCP, onFID, onCLS, onFCP, onTTFB, type Metric } from 'web-vitals';
+import { onLCP, onINP, onCLS, onFCP, onTTFB, type Metric } from 'web-vitals';
 import { logger } from '../utils/logger';
 
 export interface WebVitalsConfig {
@@ -47,7 +47,7 @@ class WebVitalsService {
 
     // Запускаем мониторинг всех метрик
     onLCP(this.handleMetric.bind(this));
-    onFID(this.handleMetric.bind(this));
+    onINP(this.handleMetric.bind(this));  // INP заменил FID в web-vitals v5
     onCLS(this.handleMetric.bind(this));
     onFCP(this.handleMetric.bind(this));
     onTTFB(this.handleMetric.bind(this));
@@ -111,8 +111,8 @@ class WebVitalsService {
     switch (name) {
       case 'LCP':
         return { good: 2500, poor: 4000 };
-      case 'FID':
-        return { good: 100, poor: 300 };
+      case 'INP':  // INP заменил FID в web-vitals v5
+        return { good: 200, poor: 500 };
       case 'CLS':
         return { good: 0.1, poor: 0.25 };
       case 'FCP':
@@ -131,6 +131,7 @@ class WebVitalsService {
     switch (name) {
       case 'CLS':
         return value.toFixed(3);
+      case 'INP':  // INP в миллисекундах как FID
       case 'FID':
       case 'TTFB':
         return `${Math.round(value)}ms`;
