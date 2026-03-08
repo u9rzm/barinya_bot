@@ -142,6 +142,7 @@ services:
       REDIS_PORT: ${REDIS_PORT:-6379} 
       REDIS_PASSWORD: ${REDIS_PASSWORD:-barbot_password}
     volumes:
+      - ./data_v2:/app/data/v2:rw
       - menu_data:/data
       - ./logs:/app/logs
     networks:
@@ -170,6 +171,7 @@ services:
     volumes:
       - menu_data:/var/www/data:ro
       - ./logs:/var/log/nginx
+      # - ./storage:/var/www/storage:ro
     ports:
       - "${ENTRY_POINT}:80"
     networks:

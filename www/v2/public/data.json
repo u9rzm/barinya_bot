@@ -1,0 +1,512 @@
+{
+  "categories": [
+    {
+      "id": "cakes",
+      "name": "Торты"
+    },
+    {
+      "id": "bakes",
+      "name": "Выпечка"
+    },
+    {
+      "id": "deserts",
+      "name": "Десерты"
+    }
+  ],
+  "options": {
+    "none_id": {
+      "id": "none_id",
+      "name": "Нет",
+      "image": "",
+      "selectionType": "single"
+    },
+    "candle_type_1_id_0": {
+      "id": "candle_type_1_id_0",
+      "name": "Графичная свеча 0",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_1": {
+      "id": "candle_type_1_id_1",
+      "name": "Графичная свеча 1",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_2": {
+      "id": "candle_type_1_id_2",
+      "name": "Графичная свеча 2",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_3": {
+      "id": "candle_type_1_id_3",
+      "name": "Графичная свеча 3",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_4": {
+      "id": "candle_type_1_id_4",
+      "name": "Графичная свеча 4",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_5": {
+      "id": "candle_type_1_id_5",
+      "name": "Графичная свеча 5",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_6": {
+      "id": "candle_type_1_id_6",
+      "name": "Графичная свеча 6",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_7": {
+      "id": "candle_type_1_id_7",
+      "name": "Графичная свеча 7",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_8": {
+      "id": "candle_type_1_id_8",
+      "name": "Графичная свеча 8",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_1_id_9": {
+      "id": "candle_type_1_id_9",
+      "name": "Графичная свеча 9",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 290
+    },
+    "candle_type_2_id_0": {
+      "id": "candle_type_2_id_0",
+      "name": "Мраморная свеча 0",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_1": {
+      "id": "candle_type_2_id_1",
+      "name": "Мраморная свеча 1",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_2": {
+      "id": "candle_type_2_id_2",
+      "name": "Мраморная свеча 2",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_3": {
+      "id": "candle_type_2_id_3",
+      "name": "Мраморная свеча 3",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_4": {
+      "id": "candle_type_2_id_4",
+      "name": "Мраморная свеча 4",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_5": {
+      "id": "candle_type_2_id_5",
+      "name": "Мраморная свеча 5",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_6": {
+      "id": "candle_type_2_id_6",
+      "name": "Мраморная свеча 6",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_7": {
+      "id": "candle_type_2_id_7",
+      "name": "Мраморная свеча 7",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_8": {
+      "id": "candle_type_2_id_8",
+      "name": "Мраморная свеча 8",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_2_id_9": {
+      "id": "candle_type_2_id_9",
+      "name": "Мраморная свеча 9",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_0": {
+      "id": "candle_type_3_id_0",
+      "name": "Золотая свеча 0",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_1": {
+      "id": "candle_type_3_id_1",
+      "name": "Золотая свеча 1",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_2": {
+      "id": "candle_type_3_id_2",
+      "name": "Золотая свеча 2",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_3": {
+      "id": "candle_type_3_id_3",
+      "name": "Золотая свеча 3",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_4": {
+      "id": "candle_type_3_id_4",
+      "name": "Золотая свеча 4",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_5": {
+      "id": "candle_type_3_id_5",
+      "name": "Золотая свеча 5",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_6": {
+      "id": "candle_type_3_id_6",
+      "name": "Золотая свеча 6",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_7": {
+      "id": "candle_type_3_id_7",
+      "name": "Золотая свеча 7",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_8": {
+      "id": "candle_type_3_id_8",
+      "name": "Золотая свеча 8",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    },
+    "candle_type_3_id_9": {
+      "id": "candle_type_3_id_9",
+      "name": "Золотая свеча 9",
+      "image": "",
+      "selectionType": "multiple",
+      "price": 170
+    }
+  },
+  "addons": {
+    "1": {
+      "id": "1",
+      "name": "Графичные свечи",
+      "optionIds": [
+        "none_id",
+        "candle_type_1_id_0",
+        "candle_type_1_id_1",
+        "candle_type_1_id_2",
+        "candle_type_1_id_3",
+        "candle_type_1_id_4",
+        "candle_type_1_id_5",
+        "candle_type_1_id_6",
+        "candle_type_1_id_7",
+        "candle_type_1_id_8",
+        "candle_type_1_id_9"
+      ]
+    },
+    "2": {
+      "id": "2",
+      "name": "Мраморные свечи",
+      "optionIds": [
+        "none_id",
+        "candle_type_2_id_0",
+        "candle_type_2_id_1",
+        "candle_type_2_id_2",
+        "candle_type_2_id_3",
+        "candle_type_2_id_4",
+        "candle_type_2_id_5",
+        "candle_type_2_id_6",
+        "candle_type_2_id_7",
+        "candle_type_2_id_8",
+        "candle_type_2_id_9"
+      ]
+    },
+    "3": {
+      "id": "3",
+      "name": "Золотые свечи",
+      "optionIds": [
+        "none_id",
+        "candle_type_3_id_0",
+        "candle_type_3_id_1",
+        "candle_type_3_id_2",
+        "candle_type_3_id_3",
+        "candle_type_3_id_4",
+        "candle_type_3_id_5",
+        "candle_type_3_id_6",
+        "candle_type_3_id_7",
+        "candle_type_3_id_8",
+        "candle_type_3_id_9"
+      ]
+    }
+  },
+  "addonGroups": {
+    "1": [
+      "1",
+      "2",
+      "3"
+    ],
+    "2": [
+      "4"
+    ]
+  },
+  "products": [
+    {
+      "id": "1",
+      "name": "Морковный с бананом и карамелью",
+      "description": "КБЖУ на 100 гр",
+      "price": 2587,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/a7a82919-8924-4944-8c5c-46f37b7c018c/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/a7a82919-8924-4944-8c5c-46f37b7c018c/playlist.m3u8",
+      "calories": 330,
+      "proteins": 5,
+      "fats": 20,
+      "carbs": 31,
+      "popularity": 50,
+      "category": "cakes",
+      "volume": "1,3 кг",
+      "longDescription": "Пряные морковные бисквиты с грецким орехом и специями, начинка из карамелизованного банана и сырно-карамельный крем. Сыр творожный, сахар, сливки, морковь, банан, мука пшеничная высшего сорта, яйцо куриное, масло растительное, масло, орех грецкий, сироп глюкозный, сметана, корица, шоколад темный, сода, разрыхлитель, соль",
+      "addonGroupId": "1"
+    },
+    {
+      "id": "2",
+      "name": "Малиновый баблз",
+      "description": "КБЖУ на 100 гр",
+      "price": 1590,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/441bdfc6-8d81-475a-84cf-400ebebfcc6c/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/441bdfc6-8d81-475a-84cf-400ebebfcc6c/playlist.m3u8",
+      "calories": 250,
+      "proteins": 4,
+      "fats": 16,
+      "carbs": 21,
+      "popularity": 50,
+      "category": "cakes",
+      "volume": "0,6 кг",
+      "longDescription": "Классический белый бисквит, лимонное кремю, малиновый мармелад, черничные шарики-баблз и малиновый мусс\r\n\r\nПокрыт шоколадным велюром и украшен кондитерской посыпкой",
+      "addonGroupId": "1"
+    },
+    {
+      "id": "3",
+      "name": "Вечерний нуар",
+      "description": "КБЖУ на 100 гр",
+      "price": 1590,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/6b6fbf6d-d290-4f3c-b763-a1ffb64a7595/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/6b6fbf6d-d290-4f3c-b763-a1ffb64a7595/playlist.m3u8",
+      "calories": 300,
+      "proteins": 4,
+      "fats": 20,
+      "carbs": 23,
+      "popularity": 50,
+      "category": "cakes",
+      "volume": "0,4 кг",
+      "longDescription": "Влажный шоколадный бисквит, карамелизированный грецкий орех, чернослив, вымоченный в ликере, крем на вареной сгущенке и сметанный мусс с копченой паприкой.\r\n\r\nПокрыт шоколадным велюром и украшен желе из пюре жимолости",
+      "addonGroupId": "1"
+    },
+    {
+      "id": "4",
+      "name": "Карамель-попкорн",
+      "description": "КБЖУ на 100 гр",
+      "price": 1590,
+      "calories": 400,
+      "proteins": 6,
+      "fats": 28,
+      "carbs": 31,
+      "popularity": 50,
+      "category": "cakes",
+      "volume": "0,5 кг",
+      "longDescription": "Сливочный мусс с белым шоколадом и попкорном, карамель, карамельный мусс, карамельный бисквит с вареной сгущенкой, хрустящий слой из белого шоколада и воздушного риса.  сливки животные, сыр творожный, шоколад белый, сахар, молоко сгущенное, масло какао, молоко коровье, яйцо куриное, мука пшеничная высшего сорта, масло сливочное, зерна кукурузы, сироп глюкозный, желатин говяжий, рис воздушный, масло растительное, краситель, ванилин\n\nПокрыт шоколадным велюром и украшен попкорном",
+      "addonGroupId": "1"
+    },
+    {
+      "id": "5",
+      "name": "Розовый полет",
+      "description": "КБЖУ на 100 гр",
+      "price": 1390,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/f2195a8f-d880-4438-93f4-f198b5c597a0/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/f2195a8f-d880-4438-93f4-f198b5c597a0/playlist.m3u8",
+      "calories": 450,
+      "proteins": 6,
+      "fats": 25,
+      "carbs": 50,
+      "popularity": 50,
+      "category": "cakes",
+      "volume": "0,5 кг",
+      "longDescription": "Воздушное безе с грецким орехом и нежным ванильно-масляным кремом. Состав: сахар, яйцо куриное, масло, орех грецкий, ванилин, какао-порошок, клубника, голубика",
+      "addonGroupId": "1"
+    },
+    {
+      "id": "6",
+      "name": "Жюльен",
+      "description": "КБЖУ на 100 гр",
+      "price": 290,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/11500978-7468-4663-ab6a-3c458749078d/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/11500978-7468-4663-ab6a-3c458749078d/playlist.m3u8",
+      "calories": 260,
+      "proteins": 12,
+      "fats": 18,
+      "carbs": 11,
+      "popularity": 50,
+      "category": "bakes",
+      "volume": "140 г",
+      "longDescription": "Песочно-дрожжевая корзинка с начинкой из курицы, грибов и сыра. Состав: сыр, филе куриное, майонез, мука пшеничная высшего сорта, лук, грибы шампиньоны свежие, грибы шампиньоны маринованные, маргарин молочный, яйцо куриное, дрожжи, соль"
+    },
+    {
+      "id": "7",
+      "name": "Мамин пирог с семгой",
+      "description": "КБЖУ на 100 гр",
+      "price": 4788,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/423297ff-2994-4b3f-ab29-66a0a9802ee8/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/423297ff-2994-4b3f-ab29-66a0a9802ee8/playlist.m3u8",
+      "calories": 350,
+      "proteins": 20,
+      "fats": 21,
+      "carbs": 19,
+      "popularity": 50,
+      "category": "bakes",
+      "volume": "1,2 кг",
+      "longDescription": "Закрытый пирог на дрожжевом кефирном тесте с богатой начинкой из семги, риса и лука. Состав: филе семги, мука пшеничная высшего сорта, масло, яйцо куриное, кефир, лук, дрожжи, рис, сухари панировочные, сахар, соль, перец черный молотый"
+    },
+    {
+      "id": "8",
+      "name": "Три молока",
+      "description": "КБЖУ на 100 гр",
+      "price": 420,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/d0b3ad45-0175-400c-a4d6-156969d4555a/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/d0b3ad45-0175-400c-a4d6-156969d4555a/playlist.m3u8",
+      "calories": 310,
+      "proteins": 6,
+      "fats": 16,
+      "carbs": 36,
+      "popularity": 50,
+      "category": "deserts",
+      "subcategory": "Кейк бокс",
+      "volume": "206 г",
+      "longDescription": "Шоколадный бисквит, сливочно-ванильный крем и молочная пропитка с ликером \"Бейлис\". Состав: сливки животные, молоко коровье, сахар, молоко сгущенное, мука пшеничная высшего сорта, сыр сливочный, яйцо куриное, какао-порошок, разрыхлитель, ликер, соль, желатин говяжий, паста ванильная"
+    },
+    {
+      "id": "9",
+      "name": "Профитроли с малиновым джемом",
+      "description": "КБЖУ на 100 гр",
+      "price": 490,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/617ec0eb-22d4-4e80-82b4-785d56cfe4ad/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/617ec0eb-22d4-4e80-82b4-785d56cfe4ad/playlist.m3u8",
+      "calories": 290,
+      "proteins": 5,
+      "fats": 17,
+      "carbs": 28,
+      "popularity": 50,
+      "category": "deserts",
+      "subcategory": "Профитроли",
+      "volume": "260 г",
+      "longDescription": "Заварное тесто с двойной начинкой: из нежного крема \"Пломбир\" и натурального малинового джема. Состав: ягода малина свежемороженая, сливки, мука пшеничная высшего сорта, масло, яйцо куриное, молоко сгущенное, сыр сливочный, сахар, крахмал кукурузный, соль."
+    },
+    {
+      "id": "10",
+      "name": "Анна Павлова",
+      "description": "КБЖУ на 100 гр",
+      "price": 390,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/5dcb9acb-1664-4b9f-9252-56126b9c0022/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/5dcb9acb-1664-4b9f-9252-56126b9c0022/playlist.m3u8",
+      "calories": 250,
+      "proteins": 3,
+      "fats": 11,
+      "carbs": 35,
+      "popularity": 50,
+      "category": "deserts",
+      "volume": "120 г",
+      "longDescription": "Воздушная итальянская меренга с кремом «Пломбир» с сердцевинкой из малинового конфи и кусочками свежей клубники; украшена ягодами. Состав: ягода клубника свежая, сахар, молоко сгущенное, ягода голубика свежая, сливки, сыр сливочный, белок яйца куриного, шоколад белый, ягода малина свежемороженая, крахмал кукурузный, ягода малина сублимированная, пектин яблочный",
+      "label": "Хит"
+    },
+    {
+      "id": "11",
+      "name": "Фисташковое мороженое",
+      "description": "КБЖУ на 100 гр",
+      "price": 120,
+      "calories": 570,
+      "proteins": 11,
+      "fats": 31,
+      "carbs": 66,
+      "popularity": 50,
+      "category": "deserts",
+      "subcategory": "Макарон",
+      "volume": "30 г",
+      "longDescription": "Французское миндальное печенье с начинкой из взбитого белого шоколада и фисташкового пралине. Украшен белым шоколадом и лепестками фисташки изумрудной. Состав: сахар, мука миндальная, белок яйца куриного, шоколад белый, сливки, паста фисташковая, орех фисташка, краситель"
+    },
+    {
+      "id": "12",
+      "name": "Баунти",
+      "description": "КБЖУ на 100 гр",
+      "price": 120,
+      "image": "https://storage.sweethome38.keenetic.pro/storage/videos/9f1fb800-2eea-4545-bc16-a2bdbd449397/thumbnail.jpg",
+      "videoUrl": "https://storage.sweethome38.keenetic.pro/storage/videos/9f1fb800-2eea-4545-bc16-a2bdbd449397/playlist.m3u8",
+      "calories": 510,
+      "proteins": 10,
+      "fats": 27,
+      "carbs": 61,
+      "popularity": 50,
+      "category": "deserts",
+      "subcategory": "Макарон",
+      "volume": "30 г",
+      "longDescription": "Французское миндальное печенье с нежной кокосовой начинкой и ганашем из темного шоколада. Состав: сахар, мука миндальная, белок яйца куриного, молоко коровье, шоколад белый, стружка кокосовая, сливки, шоколад темный, масло сливочное, краситель, крахмал кукурузный"
+    },
+    {
+      "id": "13",
+      "name": "Миндально-фисташковый",
+      "description": "КБЖУ на 100 гр",
+      "price": 2590,
+      "calories": 470,
+      "proteins": 8,
+      "fats": 30,
+      "carbs": 42,
+      "popularity": 51,
+      "category": "cakes",
+      "volume": "1 кг",
+      "longDescription": "Меренговые коржи на миндальной муке, безе и заварной фисташковый крем; покрыт шоколадной глазурью. Состав: сахар, яйцо куриное, масло, молоко коровье, орех миндаль, мука пшеничная высшего сорта, паста фисташковая",
+      "addonGroupId": "1"
+    }
+  ]
+}

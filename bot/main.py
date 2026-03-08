@@ -17,7 +17,7 @@ from shared.config import settings
 from shared.database import get_async_session
 from shared.redis import init_redis, close_redis
 from shared.logging_config import setup_logging, get_logger
-from shared.services.menu_service import MenuServiceGoogleTabs
+from shared.services.menu_service import MenuServiceGoogleTabs, MenuServiceGoogleSheetsV2
 from shared.services.statistics_scheduler import start_statistics_scheduler, stop_statistics_scheduler
 from bot.handlers import register_handlers
 from bot.middleware import LoggingMiddleware
@@ -67,7 +67,9 @@ async def on_startup() -> None:
         logger.info("Menu file does not exist")
         MenuServiceGoogleTabs().generate_menu_json()
         logger.info("Menu file created")
-    
+    #v2 Menu generator
+    MenuServiceGoogleSheetsV2('1v-5JgJg3VYWcjFNA8CgA-hwOL6y_RhctJ9HmI2Aa1O4', '/app/data/v2/data.json').generate_menu_json()
+
     # Set webhook if URL is provided
     if settings.telegram_webhook_url:
         await bot.set_webhook(

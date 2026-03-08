@@ -129,7 +129,7 @@ export const ProfileMenu = {
 
       .pm-btn {
         height: 40px;
-        border-radius: 50%;
+        border-radius: 24px;
         background: #00535E;
         border: 1px;
         border-color: #FAAC6E;
@@ -161,7 +161,7 @@ export const ProfileMenu = {
       .pm-avatar {
         width: 40px;
         height: 40px;
-        border-radius: 50%;
+        border-radius: 25%;
       }
 
       .pm-dropdown {

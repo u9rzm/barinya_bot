@@ -275,3 +275,128 @@ class MenuServiceGoogleTabs:
 
         with open(self.menu_path, "w", encoding="utf-8") as f:
             json.dump(menu, f, ensure_ascii=False, indent=4)
+
+
+class MenuServiceGoogleSheetsV2:
+
+    def __init__(self, sheet_id: str, menu_path: str):
+        self.sheet_id = sheet_id
+        self.menu_path = Path(menu_path)
+
+    def _get_sheet(self, sheet_name: str):
+        return get_service_sacc(self.sheet_id, sheet_name)
+
+    @staticmethod
+    def _split_ids(value: str):
+        if not value:
+            return []
+        return [v.strip() for v in value.split() if v.strip()]
+
+    @staticmethod
+    def _to_int(value):
+        if value in (None, "", " "):
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            return value
+
+    def generate_menu_json(self):
+
+        categories_sheet = self._get_sheet("categories")
+        options_sheet = self._get_sheet("options")
+        addons_sheet = self._get_sheet("addons")
+        addon_groups_sheet = self._get_sheet("addonGroups")
+        products_sheet = self._get_sheet("Products")
+
+        result = {
+            "categories": [],
+            "options": {},
+            "addons": {},
+            "addonGroups": {},
+            "products": []
+        }
+
+        # categories
+        for row in categories_sheet:
+            result["categories"].append({
+                "id": row.get("id"),
+                "name": row.get("name")
+            })
+
+        # options
+        for row in options_sheet:
+
+            option_id = row.get("id")
+
+            option = {
+                "id": option_id,
+                "name": row.get("name"),
+                "image": row.get("image"),
+                "selectionType": row.get("selectionType")
+            }
+
+            price = self._to_int(row.get("price"))
+            free_threshold = self._to_int(row.get("freeThreshold"))
+
+            if price is not None:
+                option["price"] = price
+
+            if free_threshold is not None:
+                option["freeThreshold"] = free_threshold
+
+            result["options"][option_id] = option
+
+        # addons
+        for row in addons_sheet:
+
+            addon_id = row.get("id")
+
+            result["addons"][addon_id] = {
+                "id": addon_id,
+                "name": row.get("name"),
+                "optionIds": self._split_ids(row.get("optionIds"))
+            }
+
+        # addonGroups
+        for row in addon_groups_sheet:
+
+            group_id = row.get("id")
+
+            result["addonGroups"][group_id] = self._split_ids(
+                row.get("addonIds")
+            )
+
+        # products
+        for row in products_sheet:
+
+            product = {
+                "id": row.get("id"),
+                "name": row.get("name"),
+                "description": row.get("description"),
+                "price": self._to_int(row.get("price")),
+                "image": row.get("image"),
+                "videoUrl": row.get("videoUrl"),
+                "calories": self._to_int(row.get("calories")),
+                "proteins": self._to_int(row.get("proteins")),
+                "fats": self._to_int(row.get("fats")),
+                "carbs": self._to_int(row.get("carbs")),
+                "popularity": self._to_int(row.get("popularity")),
+                "category": row.get("category"),
+                "subcategory": row.get("subcategory"),
+                "volume": row.get("volume"),
+                "longDescription": row.get("longDescription"),
+                "label": row.get("label"),
+                "labelColor": row.get("labelColor"),
+                "addonGroupId": row.get("addonGroupId")
+            }
+
+            result["products"].append(
+                {k: v for k, v in product.items() if v not in (None, "")}
+            )
+
+        # save json
+        self.menu_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(self.menu_path, "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)

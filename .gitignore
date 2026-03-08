@@ -23,6 +23,7 @@ tonconnect-manifest.json
 
 # Virtual Environment
 venv/
+storage/
 env/
 ENV/
 .venv

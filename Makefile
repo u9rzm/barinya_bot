@@ -67,6 +67,11 @@ logs-bot:
 logs-db:
 	docker-compose -f $(COMPOSE_FILE) logs -f postgres
 
+.PHONY: logs-nginx
+logs-nginx:
+	docker-compose -f $(COMPOSE_FILE) logs -f nginx
+
+
 # Статус сервисов
 .PHONY: status
 status:
