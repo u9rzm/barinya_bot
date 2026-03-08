@@ -20,6 +20,7 @@ const MAX_CACHE_SIZE = 50; // Max items to cache
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit
 const LOAD_TIMEOUT = 15000; // 15 seconds timeout
 const MAX_RETRIES = 2; // Retry failed loads twice
+const STALE_TIME = 5 * 60 * 1000; // 5 minutes - время жизни кэша перед background refresh
 
 export interface MediaLoadProgress {
   total: number;
@@ -38,6 +39,7 @@ export interface MediaItem {
   blob?: Blob;
   objectUrl?: string | null; // Кэш Object URL для предотвращения утечек
   retries?: number;
+  timestamp?: number; // Время загрузки для stale-while-revalidate
 }
 
 class MediaPreloaderService {
@@ -126,8 +128,9 @@ class MediaPreloaderService {
 
   /**
    * Load a single media item with timeout and retry logic
+   * Stale-while-revalidate: возвращаем кэш сразу, обновляем в фоне
    */
-  private async loadItem(item: MediaItem): Promise<void> {
+  private async loadItem(item: MediaItem, backgroundRefresh = false): Promise<void> {
     if (item.status === 'loading' || item.status === 'loaded') return;
 
     item.status = 'loading';
@@ -143,66 +146,32 @@ class MediaPreloaderService {
     }, LOAD_TIMEOUT);
 
     try {
-      // Try cache first
+      // Try cache first (stale-while-revalidate)
       if (this.cache) {
         const cached = await this.cache.match(item.url);
         if (cached && cached.ok) {
           const blob = await cached.blob();
           item.blob = blob;
           item.status = 'loaded';
+          item.timestamp = Date.now();
+          
           clearTimeout(timeoutId);
           this.abortControllers.delete(item.url);
           this.notifyProgress();
+          
+          // Background refresh if stale
+          const isStale = item.timestamp && (Date.now() - item.timestamp > STALE_TIME);
+          if (isStale || backgroundRefresh) {
+            this.backgroundRefresh(item, controller).catch(err => {
+              logger.warn('Background refresh failed', err);
+            });
+          }
           return;
         }
       }
 
       // Fetch from network with timeout
-      const response = await fetch(item.url, {
-        signal: controller.signal,
-        headers: {
-          'Range': 'bytes=0-5000000' // Request first 5MB only for initial load
-        }
-      });
-      
-      clearTimeout(timeoutId);
-      this.abortControllers.delete(item.url);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      // Check content length
-      const contentLength = response.headers.get('content-length');
-      if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
-        logger.warn(`File too large: ${item.url} (${contentLength} bytes)`);
-        throw new Error('File too large');
-      }
-
-      const blob = await response.blob();
-      
-      // Validate blob
-      if (blob.size === 0) {
-        throw new Error('Empty blob received');
-      }
-
-      item.blob = blob;
-      item.status = 'loaded';
-
-      // Cache the blob
-      if (this.cache) {
-        try {
-          const cacheResponse = new Response(blob, {
-            headers: { 'Content-Type': item.type === 'video' ? 'video/mp4' : 'image/jpeg' }
-          });
-          await this.cache.put(item.url, cacheResponse);
-        } catch (cacheError) {
-          logger.warn('Failed to cache media', cacheError);
-          // Continue even if caching fails
-        }
-      }
-
-      this.notifyProgress();
+      await this.fetchAndCache(item, controller, timeoutId);
     } catch (error) {
       clearTimeout(timeoutId);
       this.abortControllers.delete(item.url);
@@ -212,7 +181,7 @@ class MediaPreloaderService {
       if (item.retries < MAX_RETRIES && item.priority === 'critical') {
         logger.info(`Retrying load: ${item.url} (attempt ${item.retries}/${MAX_RETRIES})`);
         item.status = 'pending';
-        setTimeout(() => this.loadItem(item), 1000 * item.retries);
+        setTimeout(() => this.loadItem(item, backgroundRefresh), 1000 * item.retries);
         this.notifyProgress();
         return;
       }
@@ -220,6 +189,86 @@ class MediaPreloaderService {
       logger.warn(`Failed to load media: ${item.url}`, error);
       item.status = 'error';
       this.notifyProgress();
+    }
+  }
+
+  /**
+   * Fetch from network and cache the result
+   */
+  private async fetchAndCache(
+    item: MediaItem,
+    controller: AbortController,
+    timeoutId: ReturnType<typeof setTimeout>
+  ): Promise<void> {
+    const response = await fetch(item.url, {
+      signal: controller.signal,
+      headers: {
+        'Range': 'bytes=0-5000000' // Request first 5MB only for initial load
+      }
+    });
+
+    clearTimeout(timeoutId);
+    this.abortControllers.delete(item.url);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    // Check content length
+    const contentLength = response.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
+      logger.warn(`File too large: ${item.url} (${contentLength} bytes)`);
+      throw new Error('File too large');
+    }
+
+    const blob = await response.blob();
+
+    // Validate blob
+    if (blob.size === 0) {
+      throw new Error('Empty blob received');
+    }
+
+    item.blob = blob;
+    item.status = 'loaded';
+    item.timestamp = Date.now();
+
+    // Cache the blob
+    if (this.cache) {
+      try {
+        const cacheResponse = new Response(blob, {
+          headers: { 'Content-Type': item.type === 'video' ? 'video/mp4' : 'image/jpeg' }
+        });
+        await this.cache.put(item.url, cacheResponse);
+      } catch (cacheError) {
+        logger.warn('Failed to cache media', cacheError);
+        // Continue even if caching fails
+      }
+    }
+
+    this.notifyProgress();
+  }
+
+  /**
+   * Background refresh - update cache without blocking
+   */
+  private async backgroundRefresh(
+    item: MediaItem,
+    controller: AbortController
+  ): Promise<void> {
+    try {
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        this.abortControllers.delete(item.url);
+      }, LOAD_TIMEOUT);
+
+      await this.fetchAndCache(item, controller, timeoutId);
+      logger.debug(`Background refresh complete: ${item.url}`);
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        logger.debug('Background refresh aborted', item.url);
+      } else {
+        logger.warn('Background refresh failed', error);
+      }
     }
   }
 
