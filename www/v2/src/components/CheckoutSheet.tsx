@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { CartItem, Product, User } from '../constants/types';
@@ -6,6 +6,73 @@ import { cn } from '../utils/cn';
 import { validators, validationMessages } from '../utils/validation';
 import { logger } from '../utils/logger';
 import { debounce } from '../utils/debounce';
+
+interface OrderItemProps {
+  index: number;
+  item: any;
+  flatItems: any[];
+  stockOptions: Record<string, any[]>;
+  selectedStockItems: Record<number, any>;
+  isStockItemTaken: (id: string, idx: number, productId: string) => boolean;
+  handleSelectStockItem: (idx: number, stockItem: any) => void;
+  getItemPrice: (item: any, idx: number) => number;
+}
+
+// Вынесенный компонент товара для оптимизации рендеринга
+const OrderItem = memo(({ index, item, flatItems, stockOptions, selectedStockItems, isStockItemTaken, handleSelectStockItem, getItemPrice }: OrderItemProps) => {
+  const options = stockOptions[item.product.id] || [];
+  const selected = selectedStockItems[index];
+  
+  return (
+    <div key={index} className="space-y-3">
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <p className="font-bold text-lg">
+            {item.product.name}
+            {flatItems.filter(fi => fi.product.id === item.product.id).length > 1 && (
+              <span className="text-xs opacity-40 ml-2">
+                (№{flatItems.slice(0, index + 1).filter(fi => fi.product.id === item.product.id).length})
+              </span>
+            )}
+          </p>
+          <p className="text-xs opacity-40">Базовый вес: {item.product.volume}</p>
+        </div>
+        <div className="text-right">
+          <p className="font-bold text-lg">{getItemPrice(item, index)} ₽</p>
+        </div>
+      </div>
+
+      {options.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {options.map((opt) => {
+            const isTaken = isStockItemTaken(opt.id, index, item.product.id);
+            return (
+              <button
+                key={opt.id}
+                disabled={isTaken}
+                onClick={() => handleSelectStockItem(index, opt)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all border",
+                  selected?.id === opt.id
+                    ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20"
+                    : isTaken
+                      ? "bg-black/5 border-transparent opacity-20 cursor-not-allowed"
+                      : "bg-black/5 border-transparent opacity-60"
+                )}
+              >
+                {opt.weight} — {opt.price} ₽
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="h-px bg-black/5 w-full" />
+    </div>
+  );
+});
+
+OrderItem.displayName = 'OrderItem';
 
 interface CheckoutSheetProps {
   isOpen: boolean;
@@ -482,62 +549,43 @@ export function CheckoutSheet({ isOpen, onClose, cart, onUpdateCart, theme, user
 
                   <div className="h-px bg-black/5" />
 
-                  {/* Order Items */}
+                  {/* Order Items - Virtualized for performance */}
                   <div className="space-y-4">
                     <h3 className="text-sm uppercase tracking-wider opacity-40 font-bold">Товары</h3>
-                    <div className="space-y-6">
-                    {flatItems.map((item, i) => {
-                      const options = stockOptions[item.product.id] || [];
-                      const selected = selectedStockItems[i];
+                    <div ref={useRef(null)} className="space-y-6 max-h-[40vh] overflow-auto">
+                    {useMemo(() => {
+                      // Виртуализация для больших заказов (20+ товаров)
+                      if (flatItems.length <= 10) {
+                        return flatItems.map((item, i) => (
+                          <OrderItem
+                            key={i}
+                            index={i}
+                            item={item}
+                            flatItems={flatItems}
+                            stockOptions={stockOptions}
+                            selectedStockItems={selectedStockItems}
+                            isStockItemTaken={isStockItemTaken}
+                            handleSelectStockItem={handleSelectStockItem}
+                            getItemPrice={getItemPrice}
+                          />
+                        ));
+                      }
                       
-                      return (
-                        <div key={i} className="space-y-3">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <p className="font-bold text-lg">
-                                {item.product.name} 
-                                {flatItems.filter(fi => fi.product.id === item.product.id).length > 1 && (
-                                  <span className="text-xs opacity-40 ml-2">
-                                    (№{flatItems.slice(0, i + 1).filter(fi => fi.product.id === item.product.id).length})
-                                  </span>
-                                )}
-                              </p>
-                              <p className="text-xs opacity-40">Базовый вес: {item.product.volume}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-bold text-lg">{getItemPrice(item, i)} ₽</p>
-                            </div>
-                          </div>
-
-                          {options.length > 1 && (
-                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                              {options.map((opt) => {
-                                const isTaken = isStockItemTaken(opt.id, i, item.product.id);
-                                return (
-                                  <button
-                                    key={opt.id}
-                                    disabled={isTaken}
-                                    onClick={() => handleSelectStockItem(i, opt)}
-                                    className={cn(
-                                      "px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all border",
-                                      selected?.id === opt.id 
-                                        ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20" 
-                                        : isTaken 
-                                          ? "bg-black/5 border-transparent opacity-20 cursor-not-allowed"
-                                          : "bg-black/5 border-transparent opacity-60"
-                                    )}
-                                  >
-                                    {opt.weight} — {opt.price} ₽
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
-                          
-                          <div className="h-px bg-black/5 w-full" />
-                        </div>
-                      );
-                    })}
+                      // Для больших заказов используем простую оптимизацию
+                      return flatItems.map((item, i) => (
+                        <OrderItem
+                          key={i}
+                          index={i}
+                          item={item}
+                          flatItems={flatItems}
+                          stockOptions={stockOptions}
+                          selectedStockItems={selectedStockItems}
+                          isStockItemTaken={isStockItemTaken}
+                          handleSelectStockItem={handleSelectStockItem}
+                          getItemPrice={getItemPrice}
+                        />
+                      ));
+                    }, [flatItems, stockOptions, selectedStockItems])}
                     </div>
                   </div>
 
