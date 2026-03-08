@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { CartItem, Product, User } from '../constants/types';
