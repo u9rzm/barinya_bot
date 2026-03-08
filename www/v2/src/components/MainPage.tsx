@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, Suspense, lazy } from 'react';
+import { useState, useRef, useEffect, Suspense, lazy, memo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'motion/react';
 import { User, Moon, Sun, ShoppingBag, Plus, Globe } from 'lucide-react';
 import { cn } from '../utils/cn';
@@ -13,7 +13,7 @@ import { CartItem, Category, Product } from '../constants/types';
 const CartSheetLazy = lazy(() => import('./CartSheet').then(module => ({ default: module.CartSheet })));
 
 // Главный экран: Hero-секция, переключение категорий свайпом и профиль пользователя
-export function MainPage({
+export const MainPage = memo(function MainPage({
   activeCategory,
   setActiveCategory,
   currentProduct,
@@ -415,4 +415,14 @@ export function MainPage({
       </AnimatePresence>
     </motion.div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison для предотвращения лишних рендеров
+  return prevProps.activeCategory === nextProps.activeCategory
+    && prevProps.currentProduct?.id === nextProps.currentProduct?.id
+    && prevProps.theme === nextProps.theme
+    && prevProps.isCatalogOpen === nextProps.isCatalogOpen
+    && prevProps.isProductDetailOpen === nextProps.isProductDetailOpen
+    && prevProps.cart === nextProps.cart
+    && prevProps.categories === nextProps.categories
+    && prevProps.products === nextProps.products;
+});

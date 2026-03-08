@@ -1,4 +1,4 @@
-import { useRef, useEffect, PointerEvent, useMemo, useCallback } from 'react';
+import { useRef, useEffect, PointerEvent, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useDragControls, animate } from 'motion/react';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
@@ -7,7 +7,7 @@ import { OptimizedImage } from './OptimizedImage';
 import { throttle } from '../utils/throttle';
 
 // Компонент каталога (Bottom Sheet): выбор категорий и просмотр товаров
-export function CatalogSheet({ isOpen, onToggle, activeCategory, setActiveCategory, onSelectProduct, onCategoryChange, theme, currentProduct, categories = [], products = [] }: any) {
+export const CatalogSheet = memo(function CatalogSheet({ isOpen, onToggle, activeCategory, setActiveCategory, onSelectProduct, onCategoryChange, theme, currentProduct, categories = [], products = [] }: any) {
   const dragControls = useDragControls();
   const categoriesRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -298,4 +298,12 @@ export function CatalogSheet({ isOpen, onToggle, activeCategory, setActiveCatego
       </motion.div>
     </motion.div>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison для предотвращения лишних рендеров
+  return prevProps.isOpen === nextProps.isOpen 
+    && prevProps.activeCategory === nextProps.activeCategory
+    && prevProps.theme === nextProps.theme
+    && prevProps.currentProduct?.id === nextProps.currentProduct?.id
+    && prevProps.categories === nextProps.categories
+    && prevProps.products === nextProps.products;
+});
