@@ -12,18 +12,56 @@ interface OptimizedImageProps {
   priority?: boolean;
   onError?: () => void;
   onLoad?: () => void;
+  /** Автоматическая конвертация в WebP/AVIF */
+  useModernFormats?: boolean;
+}
+
+/**
+ * Проверка поддержки современных форматов браузером
+ */
+function supportsModernFormats(): Promise<'avif' | 'webp' | null> {
+  return new Promise((resolve) => {
+    // Проверка AVIF
+    const avif = new Image();
+    avif.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAABcAAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQAMAAAAABNjb2xybmNseAACAAIABoAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAAB9tZGF0EgAKCBgABogQEDQgMgkQAAAAB8dSLfI=';
+    
+    avif.onload = () => resolve('avif');
+    avif.onerror = () => {
+      // Проверка WebP если AVIF не поддерживается
+      const webp = new Image();
+      webp.src = 'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==';
+      webp.onload = () => resolve('webp');
+      webp.onerror = () => resolve(null);
+    };
+  });
+}
+
+/**
+ * Конвертация URL в современный формат
+ */
+function convertToModernFormat(src: string, format: 'avif' | 'webp'): string {
+  // Удаляем query параметры
+  const [baseUrl] = src.split('?');
+  const [path, extension] = baseUrl.split('.');
+  
+  if (!extension || !['jpg', 'jpeg', 'png', 'webp'].includes(extension.toLowerCase())) {
+    return src; // Не конвертируем если формат не поддерживается
+  }
+  
+  return `${path}.${format}`;
 }
 
 /**
  * Оптимизированный компонент изображения с lazy loading, placeholder и fallback.
- * 
+ *
  * Features:
  * - Lazy loading через Intersection Observer
  * - Placeholder (blur/pulse/color) до загрузки изображения
  * - Fallback на ошибку загрузки
  * - Плавное проявление после загрузки
+ * - Поддержка современных форматов (WebP/AVIF) через <picture>
  */
-export function OptimizedImage({
+export async function OptimizedImage({
   src,
   alt = '',
   className,
@@ -33,12 +71,21 @@ export function OptimizedImage({
   aspectRatio = 'aspect-square',
   priority = false,
   onError,
-  onLoad
+  onLoad,
+  useModernFormats = true
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isVisible, setIsVisible] = useState(priority || false);
+  const [supportedFormat, setSupportedFormat] = useState<'avif' | 'webp' | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  // Проверка поддержки форматов при монтировании
+  useEffect(() => {
+    if (useModernFormats) {
+      supportsModernFormats().then(setSupportedFormat);
+    }
+  }, [useModernFormats]);
 
   // Intersection Observer для lazy loading
   useEffect(() => {
@@ -101,6 +148,10 @@ export function OptimizedImage({
     }
   };
 
+  // Конвертированные URL для современных форматов
+  const avifSrc = supportedFormat === 'avif' ? convertToModernFormat(src, 'avif') : null;
+  const webpSrc = supportedFormat === 'webp' ? convertToModernFormat(src, 'webp') : null;
+
   return (
     <div
       ref={imgRef}
@@ -146,21 +197,51 @@ export function OptimizedImage({
         </div>
       )}
 
-      {/* Actual image */}
+      {/* Actual image с поддержкой современных форматов */}
       {isVisible && !hasError && (
-        <img
-          src={src}
-          alt={alt}
-          onLoad={handleLoad}
-          onError={handleError}
-          className={cn(
-            'w-full h-full object-cover transition-opacity duration-500',
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          )}
-          loading={priority ? 'eager' : 'lazy'}
-          fetchPriority={priority ? 'high' : 'auto'}
-          decoding="async"
-        />
+        useModernFormats && supportedFormat ? (
+          <picture>
+            {avifSrc && (
+              <source
+                srcSet={avifSrc}
+                type="image/avif"
+              />
+            )}
+            {webpSrc && (
+              <source
+                srcSet={webpSrc}
+                type="image/webp"
+              />
+            )}
+            <img
+              src={src}
+              alt={alt}
+              onLoad={handleLoad}
+              onError={handleError}
+              className={cn(
+                'w-full h-full object-cover transition-opacity duration-500',
+                isLoaded ? 'opacity-100' : 'opacity-0'
+              )}
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : 'auto'}
+              decoding="async"
+            />
+          </picture>
+        ) : (
+          <img
+            src={src}
+            alt={alt}
+            onLoad={handleLoad}
+            onError={handleError}
+            className={cn(
+              'w-full h-full object-cover transition-opacity duration-500',
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            )}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
+            decoding="async"
+          />
+        )
       )}
     </div>
   );
