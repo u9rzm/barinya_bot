@@ -25,7 +25,6 @@ export function CheckoutSheet({ isOpen, onClose, cart, onUpdateCart, theme, user
   const [status, setStatus] = useState<'verifying' | 'ready' | 'error' | 'success' | 'shortage'>('verifying');
   const [stockOptions, setStockOptions] = useState<Record<string, StockItem[]>>({});
   const [selectedStockItems, setSelectedStockItems] = useState<Record<number, StockItem>>({});
-  const [finalTotal, setFinalTotal] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<'delivery' | 'card' | 'crypto'>(user?.preferredPaymentMethod || 'card');
   const [shortageItems, setShortageItems] = useState<{ name: string; id: string; requested: number; available: number }[]>([]);
   
@@ -43,12 +42,15 @@ export function CheckoutSheet({ isOpen, onClose, cart, onUpdateCart, theme, user
   // AbortController для отмены fetch запросов
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Разворачиваем корзину в плоский список единиц товара
-  const flatItems = cart.flatMap(item => 
-    Array(item.quantity).fill(null).map(() => ({
-      ...item,
-      quantity: 1 // Каждая единица теперь имеет количество 1
-    }))
+  // Мемоизируем flatItems для избежания лишних вычислений
+  const flatItems = useMemo(() => 
+    cart.flatMap(item =>
+      Array(item.quantity).fill(null).map(() => ({
+        ...item,
+        quantity: 1
+      }))
+    ),
+    [cart]
   );
 
   // Update payment method if user preference changes or when sheet opens
@@ -79,23 +81,23 @@ export function CheckoutSheet({ isOpen, onClose, cart, onUpdateCart, theme, user
     setIsFormValid(isValid);
   }, [customerName, customerPhone, customerAddress]);
 
-  const paymentMethods = [
+  const paymentMethods = useMemo(() => [
     { id: 'card', name: 'Картой', icon: '💳' },
     { id: 'crypto', name: 'Криптой', icon: '💎' },
     { id: 'delivery', name: 'При получении', icon: '💵' },
-  ] as const;
+  ] as const, []);
 
-  const parseWeight = (weightStr: string) => {
+  const parseWeight = useCallback((weightStr: string) => {
     return parseFloat(weightStr.replace(/[^\d.]/g, '')) || 0;
-  };
+  }, []);
 
-  const getItemPrice = (item: any, index: number) => {
+  const getItemPrice = useCallback((item: any, index: number) => {
     const stockItem = selectedStockItems[index];
     const basePrice = stockItem ? stockItem.price : item.product.price;
     const options = Array.isArray(item.selectedOptions) ? item.selectedOptions : [];
     const addonsPrice = options.reduce((acc: number, opt: any) => acc + (opt.price || 0), 0);
     return basePrice + addonsPrice;
-  };
+  }, [selectedStockItems]);
 
   useEffect(() => {
     if (isOpen && status !== 'success') {
@@ -110,10 +112,11 @@ export function CheckoutSheet({ isOpen, onClose, cart, onUpdateCart, theme, user
     };
   }, [isOpen, cart]);
 
-  useEffect(() => {
-    const newTotal = flatItems.reduce((acc, item, index) => acc + getItemPrice(item, index), 0);
-    setFinalTotal(newTotal);
-  }, [cart, selectedStockItems]);
+  // Мемоизируем вычисление итоговой суммы
+  const finalTotal = useMemo(() => 
+    flatItems.reduce((acc, item, index) => acc + getItemPrice(item, index), 0),
+    [flatItems, getItemPrice]
+  );
 
   const verifyStock = async (retries = 2) => {
     // Отменяем предыдущий запрос если есть

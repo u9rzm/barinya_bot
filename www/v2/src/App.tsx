@@ -226,18 +226,20 @@ export default function App() {
       // Optimization: Use Map for O(1) lookup instead of O(n) findIndex
       const optionsKey = options.map(o => o.id).sort().join(',');
       const compositeKey = `${product.id}:${optionsKey}`;
-      
-      // Build a map for O(1) lookup
-      const cartItemMap = new Map<string, number>();
-      prev.forEach((item, index) => {
+
+      // Build a map for O(1) lookup - optimized with early exit
+      let existingIndex = -1;
+      for (let i = 0; i < prev.length; i++) {
+        const item = prev[i];
         const itemOptions = Array.isArray(item.selectedOptions) ? item.selectedOptions : [];
         const itemKey = `${item.product.id}:${itemOptions.map(o => o.id).sort().join(',')}`;
-        cartItemMap.set(itemKey, index);
-      });
-      
-      const existingIndex = cartItemMap.get(compositeKey);
+        if (itemKey === compositeKey) {
+          existingIndex = i;
+          break;
+        }
+      }
 
-      if (existingIndex !== undefined) {
+      if (existingIndex !== -1) {
         const newCart = [...prev];
         newCart[existingIndex].quantity += quantity;
         return newCart;
@@ -262,6 +264,11 @@ export default function App() {
   }, [recordAction]);
 
   const isAppReady = useMemo(() => !isLoading && categories.length > 0 && products.length > 0, [isLoading, categories, products]);
+
+  // Memoized current product lookup
+  const currentProduct = useMemo(() => {
+    return products.find(p => p.category === activeCategory) || products[0];
+  }, [products, activeCategory]);
 
   // Preload adjacent category products for smooth swiping
   useEffect(() => {
@@ -289,8 +296,6 @@ export default function App() {
       </AnimatePresence>
     );
   }
-
-  const currentProduct = products.find(p => p.category === activeCategory) || products[0];
 
   return (
     <div className={cn(
